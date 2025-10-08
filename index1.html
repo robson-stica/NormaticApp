@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normatic - Portal do Cliente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Adicionando a biblioteca Marked.js para renderizar Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Estilos Gerais */
+        body { 
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
+            color: #222;
+        }
+
+        /* Estilos do Cabeçalho */
+        .header-top {
+            background: #ffffff; 
+            padding: 20px 40px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .header-top .container {
+            position: relative;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+        }
+        
+        .main-nav-bar {
+            background: #173c58;
+            padding: 20px 40px;
+        }
+        .main-nav-bar ul {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            list-style: none;
+            letter-spacing: 0.5px;
+            transition: font-size: 0.3s ease;
+        }
+        .main-nav-bar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            white-space: nowrap; /* Impede que o texto do link quebre */
+            transition: color 0.2s, font-size 0.3s ease;
+        }
+        .main-nav-bar a:hover {
+            color: #e01818;
+        }
+        
+        /* Estilos do Portal */
+        .normatic-red-text { color: #ca3828; }
+        .normatic-blue-text { color: #173c58; }
+        
+        .btn-primary {
+            background-color: #ca3828;
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .btn-primary:hover {
+            background-color: #b02f21;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled {
+            background-color: #fca5a5;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        .nav-item.active { 
+            background-color: rgba(202, 56, 40, 0.1);
+            color: #ca3828; 
+            font-weight: 600;
+        }
+        
+        .banner-img {
+            width: 100%;
+            display: block;
+        }
+        
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+
+        #page-recomendacoes .view {
+            display: none;
+        }
+        #page-recomendacoes .view.active {
+            display: block;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spinner { 
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        .chat-bubble { max-width: 75%; }
+        .chat-bubble-user { background-color: #173c58; color: white; }
+        .chat-bubble-ai { background-color: #e5e7eb; color: #1f2937; }
+        .chat-bubble-ai ul { list-style-type: disc; margin-left: 20px; }
+        .chat-bubble-ai p { margin-bottom: 8px; }
+        .chat-bubble-specialist { background-color: #dcfce7; color: #166534; border-left: 3px solid #22c55e; }
+
+        #hamburger-button {
+            display: none;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* Estilos da Linha do Tempo */
+        .timeline-step .timeline-icon {
+            transition: all 0.3s ease;
+        }
+        .timeline-step.completed .timeline-icon {
+            background-color: #173c58; /* azul normatic */
+        }
+        .timeline-step.completed .timeline-icon i {
+            color: white;
+        }
+        .timeline-step.completed h3 {
+            color: #173c58;
+            font-weight: 600;
+        }
+
+        .timeline-step.active .timeline-icon {
+            background-color: #ca3828; /* vermelho normatic */
+        }
+        .timeline-step.active .timeline-icon i {
+            color: white;
+        }
+        .timeline-step.active h3 {
+            color: #ca3828;
+            font-weight: 700;
+        }
+
+
+        /* AJUSTES DE RESPONSIVIDADE PARA FONTE DO MENU */
+        @media (max-width: 1200px) {
+            .main-nav-bar a {
+                font-size: 1.1rem;
+            }
+        }
+        @media (max-width: 992px) {
+            .main-nav-bar a {
+                font-size: 1.0rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .main-nav-bar a {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* PONTO DE QUEBRA PARA CABEÇALHO EM TELAS MENORES */
+        @media (max-width: 650px) {
+            .header-top {
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+            .header-top .container {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                row-gap: 16px; /* Espaço entre a linha do logo e a linha dos botões */
+            }
+
+            #home-logo-link {
+                order: -1; /* Coloca o logo como primeiro item */
+                width: 100%; /* Faz o logo ocupar toda a largura da primeira linha */
+            }
+
+            /* Reseta o posicionamento absoluto dos containers de botões */
+            #portal-actions-container,
+            #user-info {
+                position: static;
+                transform: none;
+            }
+            
+            #user-info {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 2px;
+            }
+            #user-info.space-x-4 > :not([hidden]) ~ :not([hidden]) {
+                margin-left: 0;
+            }
+
+            .main-nav-bar a {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* PONTO DE QUEBRA PRINCIPAL PARA MOBILE */
+        @media (max-width: 500px) {
+          .header-top {
+            padding: 10px 8px;
+          }
+          .main-nav-bar {
+            padding: 12px 20px;
+            position: relative; 
+            display: flex;
+            justify-content: space-between; /* Ícone do menu à esquerda, botão à direita */
+            align-items: center;
+            min-height: 64px;
+          }
+          #hamburger-button {
+              display: block; 
+          }
+          .main-nav-bar ul {
+            display: none; /* Esconde a lista original */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #173c58;
+            border-top: 1px solid #3b5a72;
+            padding: 16px 0;
+            z-index: 100;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+          }
+          .main-nav-bar ul.menu-open {
+              display: flex; /* Mostra o menu quando aberto */
+          }
+          .main-nav-bar a {
+            font-size: 1rem; /* Tamanho da fonte dentro do menu aberto */
+          }
+
+          #main-nav #header-auth-section {
+              position: static;
+              transform: none;
+          }
+          #main-nav #header-auth-section .btn-primary {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+          }
+          
+          /* Ajuste para os checkboxes na tela de login */
+          #login-form .flex.justify-center.gap-4 {
+            flex-direction: column;
+            align-items: flex-start;
+            width: fit-content;
+            margin: 0 auto;
+          }
+          
+          .container {
+            padding: 0 8px;
+          }
+          #dashboard-view {
+            max-width: 100vw;
+            min-width: 0;
+            border-radius: 0;
+            box-shadow: none;
+          }
+          #main-content-area {
+            padding: 8px !important;
+          }
+          .page-content {
+            padding: 0 !important;
+          }
+
+          /* ===== ALTERAÇÃO SOLICITADA ===== */
+          .main-content {
+            overflow: hidden; /* Esconde a parte da imagem que transborda */
+          }
+          .banner-img {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 150vw !important; /* 2.5x da largura da tela */
+            object-fit: cover;
+            object-position: left center;
+            display: block;
+            border-radius: 0;
+          }
+          /* ===== FIM DA ALTERAÇÃO ===== */
+
+          .grid {
+            grid-template-columns: 1fr !important;
+          }
+          .md\:grid-cols-2, .md\:grid-cols-3, .lg\:grid-cols-4, .lg\:grid-cols-5 {
+            grid-template-columns: 1fr !important;
+          }
+          .md\:w-64, .lg\:w-64 {
+            width: 100% !important;
+            min-width: 0 !important;
+            border-right: none !important;
+            border-bottom: 1px solid #e5e7eb !important;
+          }
+          #calc-results-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="shadow-md z-10 mb-0.5">
+        <div class="header-top">
+            <div class="container mx-auto">
+                <div id="portal-actions-container" class="hidden absolute left-4 top-1/2 -translate-y-1/2 flex-col items-start gap-2 z-10">
+                    <button id="portal-toggle-button" class="flex items-center gap-2 text-sm normatic-blue-text hover:underline font-medium">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        <span>Voltar ao Site</span>
+                    </button>
+                    <button id="previous-function-button" class="text-sm normatic-blue-text hover:underline font-medium">
+                        Função Anterior
+                    </button>
+                </div>
+                <a href="#" id="home-logo-link">
+                  <img src="logo.svg" alt="logo Normatic" style="height:80px;max-width:350px;display:block;margin:0 auto;">
+                </a>
+                <div id="header-auth-section" class="absolute right-0 top-1/2 -translate-y-1/2">
+                    <a href="#" id="login-area-button" class="btn-primary px-4 py-2 text-sm">Acessar Site</a>
+                </div>
+                <div id="user-info" class="hidden items-center space-x-4 absolute right-0 top-1/2 -translate-y-1/2">
+                    <span id="username-display" class="font-semibold normatic-blue-text"></span>
+                    <button id="logout-button" class="text-sm normatic-red-text hover:underline flex items-center gap-1">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+        <nav id="main-nav" class="main-nav-bar">
+             <!-- Botão Hamburguer (visível apenas em telas pequenas) -->
+            <button id="hamburger-button" class="text-white focus:outline-none">
+                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <svg id="close-icon" class="w-8 h-8 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <ul id="main-menu-list">
+                <li><a href="#">Quem Somos</a></li>
+                <li><a href="#">Tratamentos</a></li>
+                <li><a href="#">Gestão Integrada</a></li>
+                <li><a href="#">Meio Ambiente</a></li>
+                <li><a href="#">Forno a Vácuo</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="landing-page-view">
+        <main class="main-content">
+            <img src="banner2.webp" alt="Banner principal da Normatic" class="banner-img">
+        </main>
+    </div>
+
+    <div id="client-portal-wrapper" class="hidden flex-grow">
+        <main class="container mx-auto px-6 py-8 flex items-center justify-center">
+            <div id="login-view" class="w-full max-w-md fade-in">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden"><div class="p-8">
+                    <h2 class="text-3xl font-bold text-center normatic-blue-text mb-2">Portal do Cliente</h2>
+                    <p class="text-center text-gray-500 mb-6">Aceda para gerir os seus pedidos.</p>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Você é?</label>
+                            <div class="flex flex-col items-start w-fit mx-auto gap-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="userType" value="client" class="form-radio text-red-500 focus:ring-red-500" checked>
+                                    <span class="ml-2">Cliente</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="userType" value="gestor" class="form-radio text-red-500 focus:ring-red-500">
+                                    <span class="ml-2">Gestor</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="userType" value="admin" class="form-radio text-red-500 focus:ring-red-500">
+                                    <span class="ml-2">Administrador</span>
+                                </label>
+                                 <label class="flex items-center">
+                                    <input type="radio" name="userType" value="collaborator" class="form-radio text-red-500 focus:ring-red-500">
+                                    <span class="ml-2">Colaborador</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="username" class="block text-gray-700 font-medium mb-2">Utilizador</label>
+                            <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="password" class="block text-gray-700 font-medium mb-2">Palavra-passe</label>
+                            <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                        </div>
+                        <button type="submit" class="w-full btn-primary font-bold py-3 px-4 rounded-md transition duration-200">Entrar</button>
+                    </form>
+                </div></div>
+            </div>
+
+            <div id="dashboard-view" class="w-full max-w-7xl hidden h-full">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden md:flex h-full" style="min-height: 70vh;">
+                    <!-- Menu Cliente -->
+                    <nav id="client-nav" class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-4 hidden">
+                        <ul class="space-y-2">
+                            <li><a href="#consulta" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="search" class="w-5 h-5"></i>Consulta de Pedido</a></li>
+                            <li><a href="#orcamento" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="file-text" class="w-5 h-5"></i>Solicitar Orçamento</a></li>
+                            <li><a href="#historico" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="history" class="w-5 h-5"></i>Histórico</a></li>
+                            <li><a href="#downloads" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="download" class="w-5 h-5"></i>Downloads</a></li>
+                            <li><a href="#dados" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="user" class="w-5 h-5"></i>Meus Dados</a></li>
+                            <li><a href="#coleta" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="truck" class="w-5 h-5"></i>Agendar Coleta</a></li>
+                            <li><a href="#entrega" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="package-check" class="w-5 h-5"></i>Agendar Entrega</a></li>
+                            <li><a href="#chat" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="message-circle" class="w-5 h-5"></i>Converse Conosco</a></li>
+                        </ul>
+                    </nav>
+                    <!-- Menu Gestor (antigo Administrador) -->
+                    <nav id="gestor-nav" class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-4 hidden">
+                        <ul class="space-y-2">
+                             <li><a href="#dashboard" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="layout-dashboard" class="w-5 h-5"></i>Dashboard Geral</a></li>
+                            <li><a href="#qualidade" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="award" class="w-5 h-5"></i>Qualidade</a></li>
+                            <li><a href="#expedicao" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="send" class="w-5 h-5"></i>Expedição</a></li>
+                            <li><a href="#tratamentos" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="flame" class="w-5 h-5"></i>Tratamentos</a></li>
+                            <li><a href="#financeiro" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="landmark" class="w-5 h-5"></i>Financeiro</a></li>
+                            <li><a href="#rh" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="users" class="w-5 h-5"></i>RH</a></li>
+                        </ul>
+                    </nav>
+                    <!-- Menu Administrador (NOVO) -->
+                    <nav id="admin-nav" class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-4 hidden">
+                        <ul class="space-y-2">
+                             <li><a href="#uploads" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="upload-cloud" class="w-5 h-5"></i>Upload de Documentos</a></li>
+                        </ul>
+                    </nav>
+                    <!-- Menu Colaborador -->
+                     <nav id="collaborator-nav" class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-4 hidden">
+                        <ul class="space-y-2">
+                            <li><a href="#consultor-ia" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="brain-circuit" class="w-5 h-5"></i>Consultor Técnico IA</a></li>
+                            <li><a href="#calculadora" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="calculator" class="w-5 h-5"></i>Calculadora de Processos</a></li>
+                            <li><a href="#instrucoes" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="book-open" class="w-5 h-5"></i>Instruções de Trabalho</a></li>
+                            <li><a href="#normas" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="file-text" class="w-5 h-5"></i>Normas Técnicas</a></li>
+                            <li><a href="#maquinas" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md font-medium text-gray-700 hover:bg-gray-200"><i data-lucide="settings" class="w-5 h-5"></i>Máquinas e ajustes</a></li>
+                        </ul>
+                    </nav>
+
+                    <div id="main-content-area" class="flex-1 p-6 md:p-8 overflow-y-auto">
+                        <!-- PÁGINAS DO GESTOR -->
+                        <div id="page-dashboard" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard Geral</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Índice de Qualidade</h3><p class="text-3xl font-bold text-green-600 mt-1">99.8%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Entregas no Prazo</h3><p class="text-3xl font-bold text-green-600 mt-1">98.2%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Faturação (Mês)</h3><p class="text-3xl font-bold normatic-blue-text mt-1">R$ 1.2M</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Turnover (RH)</h3><p class="text-3xl font-bold normatic-red-text mt-1">1.5%</p></div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                                <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Pedidos por Mês (Últimos 6)</h3><canvas id="ordersChart"></canvas></div>
+                                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Tipos de Tratamento</h3><canvas id="treatmentsChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div id="page-qualidade" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard de Qualidade</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Índice de Conformidade</h3><p class="text-3xl font-bold text-green-600 mt-1">99.8%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Peças Rejeitadas (PPM)</h3><p class="text-3xl font-bold normatic-red-text mt-1">1,250</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Custo da Não-Qualidade</h3><p class="text-3xl font-bold normatic-blue-text mt-1">R$ 15.2k</p></div>
+                            </div>
+                             <div class="bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Evolução do Índice de Conformidade</h3><canvas id="qualidadeChart"></canvas></div>
+                        </div>
+                        <div id="page-expedicao" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard de Expedição</h2>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">On-Time Delivery (OTD)</h3><p class="text-3xl font-bold text-green-600 mt-1">98.2%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Custo de Frete Médio</h3><p class="text-3xl font-bold normatic-blue-text mt-1">R$ 215,50</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Pedidos em Trânsito</h3><p class="text-3xl font-bold normatic-blue-text mt-1">22</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Pedidos por Transportadora</h3><canvas id="expedicaoChart"></canvas></div>
+                        </div>
+                        <div id="page-tratamentos" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard de Tratamentos</h2>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Eficiência Operacional (OEE)</h3><p class="text-3xl font-bold text-green-600 mt-1">89%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Tempo de Ciclo Médio</h3><p class="text-3xl font-bold normatic-blue-text mt-1">4.2h</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Utilização de Fornos</h3><p class="text-3xl font-bold normatic-blue-text mt-1">76%</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Carga por Tipo de Forno</h3><canvas id="tratamentosChart"></canvas></div>
+                        </div>
+                        <div id="page-financeiro" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard Financeiro</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Faturação (Mês)</h3><p class="text-3xl font-bold text-green-600 mt-1">R$ 1.2M</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Margem de Lucro</h3><p class="text-3xl font-bold text-green-600 mt-1">18.5%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Contas a Receber (Prazo)</h3><p class="text-3xl font-bold normatic-blue-text mt-1">42 dias</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Faturação vs. Custos</h3><canvas id="financeiroChart"></canvas></div>
+                        </div>
+                        <div id="page-rh" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Dashboard de RH</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Turnover (Rotatividade)</h3><p class="text-3xl font-bold normatic-red-text mt-1">1.5%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Absentismo</h3><p class="text-3xl font-bold normatic-red-text mt-1">0.8%</p></div>
+                                <div class="bg-gray-50 p-6 rounded-lg border"><h3 class="text-gray-500 text-sm font-semibold">Horas de Treinamento</h3><p class="text-3xl font-bold text-green-600 mt-1">240h</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border"><h3 class="font-semibold mb-4 normatic-blue-text">Contratações vs. Desligamentos</h3><canvas id="rhChart"></canvas></div>
+                        </div>
+
+                        <!-- PÁGINA DO ADMINISTRADOR (NOVO) -->
+                        <div id="page-uploads" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-2">Upload de Documentos</h2>
+                            <p class="text-gray-500 mb-6">Envie documentos para disponibilizar aos clientes.</p>
+                            <form id="upload-form" class="space-y-4 max-w-lg bg-white p-6 rounded-lg shadow-sm border">
+                                <div>
+                                    <label for="upload-client-id" class="block text-sm font-medium text-gray-700">ID do Cliente <span class="text-red-500">*</span></label>
+                                    <input type="text" id="upload-client-id" placeholder="Ex: cliente1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required>
+                                </div>
+                                <div>
+                                    <label for="upload-order-id" class="block text-sm font-medium text-gray-700">Nº do Pedido (Opcional)</label>
+                                    <input type="text" id="upload-order-id" placeholder="Ex: 12345" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500">
+                                </div>
+                                <div>
+                                    <label for="upload-doc-type" class="block text-sm font-medium text-gray-700">Tipo de Documento <span class="text-red-500">*</span></label>
+                                    <select id="upload-doc-type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required>
+                                        <option value="Certificado">Certificado</option>
+                                        <option value="Ordem de Serviço">Ordem de Serviço</option>
+                                        <option value="Pedido">Pedido</option>
+                                        <option value="Laudo">Laudo</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="upload-file" class="block text-sm font-medium text-gray-700">Arquivo <span class="text-red-500">*</span></label>
+                                    <input type="file" id="upload-file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100" required>
+                                </div>
+                                <div class="text-right">
+                                    <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">
+                                        <i data-lucide="upload" class="w-4 h-4 inline-block -mt-1 mr-1"></i>
+                                        Enviar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- PÁGINAS DO CLIENTE -->
+                        <!-- PÁGINA INSTRUÇÕES DE TRABALHO COLABORADOR -->
+                        <!-- PÁGINA NORMAS TÉCNICAS COLABORADOR -->
+                        <div id="page-normas" class="page-content hidden">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-4">Normas Técnicas</h2>
+                            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <button type="button" data-norma="norma-nbr6361" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ABNT NBR 6361 – Tratamentos térmicos de aços</button>
+                                <button type="button" data-norma="norma-astmb889" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM B889 – Carburizing of Steels</button>
+                                <button type="button" data-norma="norma-saej423" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">SAE J423 – Carburizing and Austempering of Steels</button>
+                                <button type="button" data-norma="norma-nbr11718" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ABNT NBR 11718 – Têmpera e revenimento em aços</button>
+                                <button type="button" data-norma="norma-astma255" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM A255 – Hardenability of Steel by End-Quench Test</button>
+                                <button type="button" data-norma="norma-astme140" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM E140 – Conversion of Hardness Values</button>
+                                <button type="button" data-norma="norma-nbriso15787" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ABNT NBR ISO 15787 – Nitretação e nitrocarburação</button>
+                                <button type="button" data-norma="norma-din17022" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">DIN 17022-4 – Plasma Nitriding of Steels</button>
+                                <button type="button" data-norma="norma-nbr11716" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ABNT NBR 11716 – Recozimento e normalização de aços</button>
+                                <button type="button" data-norma="norma-astma991" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM A991 – Annealing of Carbon and Alloy Steels</button>
+                                <button type="button" data-norma="norma-astma939" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM A939 – Normalizing of Carbon Steels</button>
+                                <button type="button" data-norma="norma-astma275" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM A275 – Stress Relief Heat Treatments of Steels</button>
+                                <button type="button" data-norma="norma-astma262" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM A262 – Intergranular Corrosion in Stainless Steels</button>
+                                <button type="button" data-norma="norma-astmb918" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ASTM B918 – Heat Treatment of Aluminum Alloys</button>
+                                <button type="button" data-norma="norma-nbr6834" class="norma-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">ABNT NBR 6834 – Tratamento térmico de ligas de alumínio</button>
+                            </div>
+                            <div id="norma-content" class="bg-white p-6 rounded-lg shadow border">
+                                <div id="norma-nbr6361" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ABNT NBR 6361 – Tratamentos térmicos de aços – Diretrizes gerais</h3>
+                                    <p>Define requisitos gerais para execução de tratamentos térmicos em aços, estabelecendo parâmetros básicos de temperatura, resfriamento, controle de atmosfera e inspeção.</p>
+                                </div>
+                                <div id="norma-astmb889" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM B889 – Carburizing of Steels</h3>
+                                    <p>Norma que especifica requisitos para cementação (carburização) de aços, incluindo métodos de controle de profundidade da camada e dureza superficial.</p>
+                                </div>
+                                <div id="norma-saej423" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">SAE J423 – Carburizing and Austempering of Steels</h3>
+                                    <p>Guia técnico para aplicação de cementação e austêmpera em aços, detalhando composições químicas, atmosferas de forno e parâmetros de resfriamento.</p>
+                                </div>
+                                <div id="norma-nbr11718" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ABNT NBR 11718 – Têmpera e revenimento em aços</h3>
+                                    <p>Norma brasileira que estabelece procedimentos para têmpera e revenimento, definindo critérios de resfriamento, dureza e microestrutura esperada.</p>
+                                </div>
+                                <div id="norma-astma255" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM A255 – Hardenability of Steel by End-Quench Test (Jominy Test)</h3>
+                                    <p>Norma que padroniza o ensaio de temperabilidade Jominy, usado para medir a profundidade da têmpera em aços.</p>
+                                </div>
+                                <div id="norma-astme140" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM E140 – Conversion of Hardness Values (Brinell, Rockwell, Vickers, etc.)</h3>
+                                    <p>Tabelas e métodos padronizados para conversão entre diferentes escalas de dureza.</p>
+                                </div>
+                                <div id="norma-nbriso15787" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ABNT NBR ISO 15787 – Tratamento termoquímico – Nitretação e nitrocarburação</h3>
+                                    <p>Norma internacional adotada no Brasil que define processos de nitretação e nitrocarburação (inclusive plasma), incluindo atmosferas, tempos e espessura de camada.</p>
+                                </div>
+                                <div id="norma-din17022" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">DIN 17022-4 – Plasma Nitriding of Steels</h3>
+                                    <p>Norma alemã que estabelece parâmetros técnicos de nitretação a plasma em aços, incluindo controle de tensão elétrica, temperatura e formação de camadas compostas.</p>
+                                </div>
+                                <div id="norma-nbr11716" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ABNT NBR 11716 – Recozimento e normalização de aços</h3>
+                                    <p>Define procedimentos de recozimento (total, esferoidização, isotérmico) e normalização para aços, com foco em redução de dureza e refinamento estrutural.</p>
+                                </div>
+                                <div id="norma-astma991" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM A991 – Annealing of Carbon and Alloy Steels</h3>
+                                    <p>Norma americana que padroniza o recozimento de aços carbono e ligados, incluindo parâmetros de resfriamento e propriedades resultantes.</p>
+                                </div>
+                                <div id="norma-astma939" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM A939 – Normalizing of Carbon Steels</h3>
+                                    <p>Norma para normalização de aços carbono, estabelecendo requisitos de temperatura e resfriamento para uniformização estrutural.</p>
+                                </div>
+                                <div id="norma-astma275" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM A275 – Stress Relief Heat Treatments of Steels</h3>
+                                    <p>Define práticas de alívio de tensões em aços, incluindo tratamentos em atmosfera controlada e a vácuo, com critérios para evitar deformações.</p>
+                                </div>
+                                <div id="norma-astma262" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM A262 – Practices for Detecting Susceptibility to Intergranular Corrosion in Stainless Steels</h3>
+                                    <p>Norma usada para avaliar a eficiência de solubilização em inoxidáveis, garantindo resistência à corrosão intergranular.</p>
+                                </div>
+                                <div id="norma-astmb918" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ASTM B918 – Heat Treatment of Aluminum Alloys</h3>
+                                    <p>Norma que estabelece práticas de solubilização, resfriamento e envelhecimento artificial/natural em ligas de alumínio.</p>
+                                </div>
+                                <div id="norma-nbr6834" class="norma-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">ABNT NBR 6834 – Tratamento térmico de ligas de alumínio</h3>
+                                    <p>Norma brasileira para tratamento térmico de ligas de alumínio, similar à ASTM B918, com foco em práticas de solubilização e envelhecimento.</p>
+                                </div>
+                            </div>
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.querySelectorAll('.norma-btn').forEach(function(btn) {
+                                    btn.addEventListener('click', function() {
+                                        document.querySelectorAll('.norma-details').forEach(function(detail) {
+                                            detail.classList.add('hidden');
+                                        });
+                                        var target = this.getAttribute('data-norma');
+                                        var el = document.getElementById(target);
+                                        if (el) el.classList.remove('hidden');
+                                    });
+                                });
+                            });
+                            </script>
+                        </div>
+                        <div id="page-instrucoes" class="page-content hidden">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-4">Instruções de Trabalho</h2>
+                            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <button type="button" data-it="it0001" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0001 – Cementação</button>
+                                <button type="button" data-it="it0002" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0002 – Têmpera</button>
+                                <button type="button" data-it="it0003" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0003 – Revenimento</button>
+                                <button type="button" data-it="it0004" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0004 – Nitretação a plasma</button>
+                                <button type="button" data-it="it0005" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0005 – Recozimento total</button>
+                                <button type="button" data-it="it0006" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0006 – Normalização</button>
+                                <button type="button" data-it="it0007" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0007 – Martêmpera</button>
+                                <button type="button" data-it="it0008" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0008 – Austêmpera</button>
+                                <button type="button" data-it="it0009" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0009 – Alívio de tensões a vácuo</button>
+                                <button type="button" data-it="it0010" class="it-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">IT0010 – Solubilização + Envelhecimento</button>
+                            </div>
+                            <div id="it-content" class="bg-white p-6 rounded-lg shadow border">
+                                <div id="it0001" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0001 – Cementação</h3>
+                                    <p><strong>Descrição:</strong> Tratamento superficial aplicado em aços de baixo carbono para enriquecer a superfície com carbono.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 900–950 °C, atmosfera carburante, tempo 6–8h, seguido de têmpera e revenimento.</p>
+                                    <p><strong>Objetivo:</strong> Obter camada superficial com dureza elevada (&gt; 58 HRC) mantendo núcleo tenaz.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR 6361 – Tratamentos térmicos de aços – diretrizes gerais.</li>
+                                        <li>ASTM B889 – Carburizing of steels.</li>
+                                        <li>SAE J423 – Carburizing steels.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Definem parâmetros de temperatura, tempo e atmosfera para cementação em aços de baixo carbono, garantindo controle de camada e dureza superficial.</p>
+                                </div>
+                                <div id="it0002" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0002 – Têmpera</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento acima da temperatura crítica e resfriamento rápido.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 820–870 °C, resfriamento em óleo, água ou polímero.</p>
+                                    <p><strong>Objetivo:</strong> Aumentar dureza e resistência ao desgaste (até ~60 HRC dependendo do aço).</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR 11718 – Têmpera e revenimento em aços.</li>
+                                        <li>ASTM A255 – Hardenability of steel by end-quench test (Jominy).</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Estabelecem métodos de têmpera (óleo, água, polímero), critérios de resfriamento e formas de avaliar a temperabilidade dos aços.</p>
+                                </div>
+                                <div id="it0003" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0003 – Revenimento</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento controlado após têmpera para reduzir fragilidade.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 150–650 °C, tempo 1–3h, resfriamento ao ar.</p>
+                                    <p><strong>Objetivo:</strong> Ajustar dureza e tenacidade conforme aplicação (alívio de tensões internas).</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR 11718 – (também contempla revenimento).</li>
+                                        <li>ASTM E140 – Conversão de durezas (Brinell, Rockwell, Vickers).</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Definem condições para reduzir fragilidade após têmpera e tabelas de conversão de dureza após revenimento.</p>
+                                </div>
+                                <div id="it0004" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0004 – Nitretação a plasma</h3>
+                                    <p><strong>Descrição:</strong> Enriquecimento superficial com nitrogênio em plasma ionizado.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 480–580 °C, atmosfera de N₂+H₂, tempo 10–20h.</p>
+                                    <p><strong>Objetivo:</strong> Alta dureza superficial (700–1200 HV), boa resistência ao desgaste e fadiga.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR ISO 15787 – Tratamento termoquímico – nitretação e nitrocarburação.</li>
+                                        <li>DIN 17022-4 – Plasma nitriding of steels.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Normas padronizam parâmetros de plasma (tensão, atmosfera e tempo) e critérios de camadas compostas em aços nitretados.</p>
+                                </div>
+                                <div id="it0005" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0005 – Recozimento total</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento seguido de resfriamento lento dentro do forno.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 700–750 °C, tempo 2–6h.</p>
+                                    <p><strong>Objetivo:</strong> Amolecer o material (dureza &lt; 200 HB), melhorar usinabilidade e homogeneizar estrutura.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR 11716 – Recozimento de aços.</li>
+                                        <li>ASTM A991 – Annealing of carbon and alloy steels.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Especificam procedimentos de recozimento total, esferoidização e isotérmico para reduzir dureza e melhorar usinabilidade.</p>
+                                </div>
+                                <div id="it0006" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0006 – Normalização</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento acima da zona crítica e resfriamento em ar calmo.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 850–900 °C.</p>
+                                    <p><strong>Objetivo:</strong> Refinar grão, uniformizar estrutura, preparar para posterior têmpera.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR 11716 – Inclui normalização.</li>
+                                        <li>ASTM A 939 – Normalizing of carbon steels.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Estabelecem parâmetros de temperatura e resfriamento em ar para uniformização da estrutura do aço.</p>
+                                </div>
+                                <div id="it0007" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0007 – Martêmpera</h3>
+                                    <p><strong>Descrição:</strong> Resfriamento rápido até temperatura intermediária e permanência antes de terminar o resfriamento.</p>
+                                    <p><strong>Parâmetros típicos:</strong> Aquecimento a 850 °C, resfriamento em banho de sais a 150–300 °C, seguido de ar.</p>
+                                    <p><strong>Objetivo:</strong> Minimizar tensões e distorções em peças temperadas.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ASTM A255 – Ensaios de temperabilidade aplicáveis.</li>
+                                        <li>ABNT NBR 11718 – Processos alternativos de têmpera (inclui martêmpera).</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Definem técnicas de resfriamento intermediário (banho de sais), minimizando tensões e distorções em peças de geometria complexa.</p>
+                                </div>
+                                <div id="it0008" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0008 – Austêmpera</h3>
+                                    <p><strong>Descrição:</strong> Resfriamento rápido seguido de permanência em banho de sais até transformação bainítica.</p>
+                                    <p><strong>Parâmetros típicos:</strong> Aquecimento a 850–900 °C, resfriamento em sais a 250–400 °C.</p>
+                                    <p><strong>Objetivo:</strong> Produzir bainita com boa dureza (~40–55 HRC) e alta resistência à fadiga.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ASTM A255 – (aplicável à caracterização da temperabilidade).</li>
+                                        <li>SAE J423 – Procedimentos de austêmpera em ferros fundidos e aços.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Normas estabelecem parâmetros de transformação bainítica, resultando em dureza e resistência melhor equilibradas.</p>
+                                </div>
+                                <div id="it0009" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0009 – Alívio de tensões a vácuo (Bright Stress Relief)</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento em atmosfera controlada para remover tensões.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 550–650 °C, tempo 2–4h, resfriamento em vácuo.</p>
+                                    <p><strong>Objetivo:</strong> Reduzir tensões internas sem alterar dureza e manter acabamento brilhante.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ABNT NBR ISO 15787 – (aborda alívio de tensões).</li>
+                                        <li>ASTM A275 – Stress relief heat treatments of steels.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Normas definem procedimentos para redução de tensões internas sem alteração significativa da dureza, mantendo acabamento superficial.</p>
+                                </div>
+                                <div id="it0010" class="it-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">IT0010 – Solubilização + Envelhecimento (para inox ou alumínio)</h3>
+                                    <p><strong>Descrição:</strong> Aquecimento até solubilização seguido de resfriamento rápido e envelhecimento subsequente.</p>
+                                    <p><strong>Parâmetros típicos:</strong> 1000–1100 °C solubilização + 500–600 °C envelhecimento.</p>
+                                    <p><strong>Objetivo:</strong> Aumentar resistência mecânica em ligas endurecíveis por precipitação.</p>
+                                    <p class="mt-4"><strong>Normas relacionadas:</strong></p>
+                                    <ul class="list-disc ml-6">
+                                        <li>ASTM A262 – Practices for detecting susceptibility to intergranular corrosion in stainless steels.</li>
+                                        <li>ASTM B918 – Heat treatment of aluminum alloys.</li>
+                                        <li>ABNT NBR 6834 – Tratamento térmico de ligas de alumínio.</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Resumo:</strong> Normas regulam solubilização (dissolução de precipitados), resfriamento rápido e envelhecimento para aumento de resistência mecânica em ligas especiais.</p>
+                                </div>
+                            </div>
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.querySelectorAll('.it-btn').forEach(function(btn) {
+                                    btn.addEventListener('click', function() {
+                                        document.querySelectorAll('.it-details').forEach(function(detail) {
+                                            detail.classList.add('hidden');
+                                        });
+                                        var target = this.getAttribute('data-it');
+                                        var el = document.getElementById(target);
+                                        if (el) el.classList.remove('hidden');
+                                    });
+                                });
+                            });
+                            </script>
+                        </div>
+                        <div id="page-consulta" class="page-content">
+                             <h2 class="text-2xl font-bold normatic-blue-text mb-2">Consulte o seu Pedido</h2>
+                            <p class="text-gray-500 mb-6">Insira o número do pedido para ver o estado atual.</p>
+                            <form id="search-form" class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" id="order-id" placeholder="Ex: 12345" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                                <button type="submit" class="w-full sm:w-auto btn-primary font-bold text-lg px-8 py-3 rounded-md flex items-center justify-center">
+                                    <span id="button-text">Buscar</span>
+                                    <div id="loading-spinner" class="hidden w-6 h-6 border-4 border-white border-t-transparent rounded-full spinner"></div>
+                                </button>
+                            </form>
+                            <div id="result-container" class="hidden mt-6">
+                                <div id="success-result" class="hidden">
+                                    <h3 class="text-xl font-semibold normatic-blue-text mb-4">Detalhes do Pedido <span id="result-order-id" class="normatic-red-text"></span></h3>
+                                    
+                                    <!-- Gemini: Resumo Inteligente -->
+                                    <div id="gemini-summary-container" class="hidden mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                                        <p class="text-sm font-bold text-blue-800 mb-1 flex items-center gap-2">
+                                            <i data-lucide="sparkles" class="w-4 h-4 text-blue-600"></i>
+                                            Resumo Inteligente
+                                        </p>
+                                        <div id="gemini-summary-loader" class="text-center p-2">
+                                             <div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full spinner"></div>
+                                        </div>
+                                        <div id="gemini-summary-text" class="text-blue-900 hidden prose prose-sm max-w-none"></div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="bg-gray-50 p-4 rounded-md border"><p class="text-sm text-gray-500">Estado</p><p id="status" class="text-lg font-semibold text-green-600"></p></div>
+                                        <div class="bg-gray-50 p-4 rounded-md border"><p class="text-sm text-gray-500">Previsão de Entrega</p><p id="delivery-date" class="text-lg font-semibold"></p></div>
+                                        <div class="bg-gray-50 p-4 rounded-md border col-span-1 sm:col-span-2"><p class="text-sm text-gray-500">Última Atualização</p><p id="last-update" class="text-lg font-semibold"></p></div>
+                                    </div>
+                                    
+                                    <div id="order-timeline" class="mt-8">
+                                        <h4 class="text-lg font-semibold text-gray-700 mb-4">Linha do Tempo do Processo</h4>
+                                        <ol class="relative border-l-2 border-gray-200 ml-3">                  
+                                            <li class="mb-10 ml-6 timeline-step" data-step="recebido">
+                                                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full -left-3.5 ring-8 ring-white timeline-icon">
+                                                    <i data-lucide="inbox" class="w-4 h-4 text-gray-600"></i>
+                                                </span>
+                                                <h3 class="font-semibold text-gray-800">Pedido Recebido</h3>
+                                                <p class="text-sm font-normal text-gray-500">O seu pedido foi registado no nosso sistema.</p>
+                                                <time class="block mt-1 text-xs font-normal leading-none text-gray-400"></time>
+                                            </li>
+                                            <li class="mb-10 ml-6 timeline-step" data-step="material">
+                                                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full -left-3.5 ring-8 ring-white timeline-icon">
+                                                    <i data-lucide="boxes" class="w-4 h-4 text-gray-600"></i>
+                                                </span>
+                                                <h3 class="font-semibold text-gray-800">Aguardando Material</h3>
+                                                <p class="text-sm font-normal text-gray-500">Estamos a aguardar a chegada das suas peças ou de material necessário.</p>
+                                                <time class="block mt-1 text-xs font-normal leading-none text-gray-400"></time>
+                                            </li>
+                                            <li class="mb-10 ml-6 timeline-step" data-step="producao">
+                                                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full -left-3.5 ring-8 ring-white timeline-icon">
+                                                    <i data-lucide="flame" class="w-4 h-4 text-gray-600"></i>
+                                                </span>
+                                                <h3 class="font-semibold text-gray-800">Em Produção</h3>
+                                                <p class="text-sm font-normal text-gray-500">As suas peças estão a passar pelo tratamento térmico.</p>
+                                                <time class="block mt-1 text-xs font-normal leading-none text-gray-400"></time>
+                                            </li>
+                                            <li class="mb-10 ml-6 timeline-step" data-step="qualidade">
+                                                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full -left-3.5 ring-8 ring-white timeline-icon">
+                                                    <i data-lucide="award" class="w-4 h-4 text-gray-600"></i>
+                                                </span>
+                                                <h3 class="font-semibold text-gray-800">Controle de Qualidade</h3>
+                                                <p class="text-sm font-normal text-gray-500">A verificar as especificações e a qualidade do tratamento.</p>
+                                                <time class="block mt-1 text-xs font-normal leading-none text-gray-400"></time>
+                                            </li>
+                                            <li class="ml-6 timeline-step" data-step="finalizado">
+                                                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full -left-3.5 ring-8 ring-white timeline-icon">
+                                                    <i data-lucide="package-check" class="w-4 h-4 text-gray-600"></i>
+                                                </span>
+                                                <h3 class="font-semibold text-gray-800">Pedido Finalizado</h3>
+                                                <p class="text-sm font-normal text-gray-500">O seu pedido está pronto para expedição ou agendamento de entrega.</p>
+                                                <time class="block mt-1 text-xs font-normal leading-none text-gray-400"></time>
+                                            </li>
+                                        </ol>
+                                    </div>
+
+                                    <!-- Gemini: O que acontece a seguir -->
+                                    <div class="mt-8 text-center">
+                                        <button id="next-steps-button" class="bg-gray-200 text-gray-800 font-semibold px-4 py-2 rounded-md hover:bg-gray-300 transition-colors">
+                                           ✨ O que acontece a seguir?
+                                        </button>
+                                    </div>
+                                    <div id="gemini-next-steps-container" class="hidden mt-4 p-4 bg-gray-50 border rounded-lg">
+                                        <div id="gemini-next-steps-loader" class="text-center text-sm text-gray-500 flex items-center justify-center gap-2">
+                                            <div class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full spinner"></div>
+                                            A gerar explicação...
+                                        </div>
+                                        <div id="gemini-next-steps-text" class="text-gray-700 hidden prose prose-sm max-w-none"></div>
+                                    </div>
+
+                                </div>
+                                <div id="error-message" class="hidden text-center"><p class="text-lg font-medium text-red-600"></p></div>
+                            </div>
+                        </div>
+                        <div id="page-orcamento" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-2">Solicitar Orçamento</h2>
+                            <p class="text-gray-500 mb-6">Preencha os detalhes abaixo para receber uma cotação.</p>
+                            <form id="quote-form" class="space-y-4 max-w-lg">
+                                <div>
+                                    <label for="metal-type" class="block text-sm font-medium text-gray-700">Tipo de Metal</label>
+                                    <select id="metal-type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500">
+                                        <option value="construcao_mecanica">Aços de construção mecânica</option>
+                                        <option value="ferramenta_especiais">Aços ferramenta, aços rápidos e aços especiais</option>
+                                        <option value="ferros_fundidos">Ferros-fundidos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="treatment-type" class="block text-sm font-medium text-gray-700">Tratamentos Necessários</label>
+                                    <select id="treatment-type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"></select>
+                                </div>
+                                <div><label for="quantity" class="block text-sm font-medium text-gray-700">Quantidade de Peças</label><input type="number" id="quantity" placeholder="Ex: 50" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"></div>
+                                <div class="text-right"><button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">Enviar Solicitação</button></div>
+                            </form>
+                        </div>
+                        <div id="page-historico" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-6">Histórico de Pedidos</h2>
+                            <div id="history-list" class="space-y-4"></div>
+                        </div>
+                        <div id="page-downloads" class="page-content">
+                            <!-- Conteúdo será gerado dinamicamente via JS -->
+                        </div>
+                        <div id="page-dados" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-2">Meus Dados</h2>
+                            <p class="text-gray-500 mb-6">Mantenha as suas informações cadastrais atualizadas.</p>
+                            <form id="user-data-form" class="space-y-4 max-w-lg">
+                                <div><label for="user-name" class="block text-sm font-medium text-gray-700">Nome / Razão Social <span class="text-red-500">*</span></label><input type="text" id="user-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                <div><label for="user-address" class="block text-sm font-medium text-gray-700">Endereço <span class="text-red-500">*</span></label><textarea id="user-address" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></textarea></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div><label for="user-phone" class="block text-sm font-medium text-gray-700">Telefone <span class="text-red-500">*</span></label><input type="tel" id="user-phone" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                    <div><label for="user-email" class="block text-sm font-medium text-gray-700">E-mail <span class="text-red-500">*</span></label><input type="email" id="user-email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                </div>
+                                <hr class="my-4">
+                                <div><label for="user-default-delivery" class="block text-sm font-medium text-gray-700">Endereço Padrão de Entrega (Opcional)</label><textarea id="user-default-delivery" rows="3" placeholder="Deixe em branco para usar o endereço principal" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"></textarea></div>
+                                <div><label for="user-default-pickup" class="block text-sm font-medium text-gray-700">Endereço Padrão de Coleta (Opcional)</label><textarea id="user-default-pickup" rows="3" placeholder="Deixe em branco para usar o endereço principal" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"></textarea></div>
+                                <div class="text-right"><button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">Salvar Alterações</button></div>
+                            </form>
+                        </div>
+                        <div id="page-coleta" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-2">Agendar Coleta</h2>
+                            <p class="text-gray-500 mb-6">Preencha os dados para agendarmos a coleta das suas peças.</p>
+                            <form id="pickup-form" class="space-y-4 max-w-lg">
+                                <div><label for="pickup-order" class="block text-sm font-medium text-gray-700">Nº do Pedido (Opcional)</label><input type="text" id="pickup-order" placeholder="Ex: 12345" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"></div>
+                                <div><label for="pickup-address" class="block text-sm font-medium text-gray-700">Endereço de Coleta</label><textarea id="pickup-address" rows="3" placeholder="Rua, Número, Bairro, Cidade" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></textarea></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div><label for="pickup-date" class="block text-sm font-medium text-gray-700">Data Preferencial</label><input type="date" id="pickup-date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                    <div><label for="pickup-time" class="block text-sm font-medium text-gray-700">Horário Preferencial</label><input type="time" id="pickup-time" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                </div>
+                                <div class="text-right"><button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">Agendar Coleta</button></div>
+                            </form>
+                        </div>
+                        <div id="page-entrega" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-2">Agendar Entrega</h2>
+                            <p class="text-gray-500 mb-6">Informe o endereço e a data para a entrega das peças prontas.</p>
+                             <form id="delivery-form" class="space-y-4 max-w-lg">
+                                <div><label for="delivery-order" class="block text-sm font-medium text-gray-700">Nº do Pedido</label><input type="text" id="delivery-order" placeholder="Ex: 67890" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                <div><label for="delivery-address" class="block text-sm font-medium text-gray-700">Endereço de Entrega</label><textarea id="delivery-address" rows="3" placeholder="Rua, Número, Bairro, Cidade" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></textarea></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div><label for="delivery-date-input" class="block text-sm font-medium text-gray-700">Data Preferencial</label><input type="date" id="delivery-date-input" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                    <div><label for="delivery-time" class="block text-sm font-medium text-gray-700">Horário Preferencial</label><input type="time" id="delivery-time" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500" required></div>
+                                </div>
+                                <div class="text-right"><button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">Agendar Entrega</button></div>
+                            </form>
+                        </div>
+                        <div id="page-chat" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-4">Converse Conosco</h2>
+                            <div id="chat-window" class="flex-1 bg-gray-100 rounded-md p-4 overflow-y-auto space-y-4 h-full" style="max-height: 400px;"></div>
+                            <div id="ai-typing-indicator" class="text-sm text-gray-500 h-5 mt-1 hidden"><p>Assistente virtual está a digitar...</p></div>
+                            <form id="chat-form" class="mt-2 flex gap-2">
+                                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                                <button type="submit" class="btn-primary p-2 rounded-md flex items-center justify-center"><i data-lucide="send" class="w-5 h-5"></i></button>
+                            </form>
+                        </div>
+
+                        <!-- PÁGINAS DO COLABORADOR -->
+                        <div id="page-consultor-ia" class="page-content">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-4">Consultor Técnico (IA)</h2>
+                            <div id="consultant-chat-window" class="flex-1 bg-gray-100 rounded-md p-4 overflow-y-auto space-y-4 h-full" style="max-height: 400px;"></div>
+                            <div id="consultant-ai-typing-indicator" class="text-sm text-gray-500 h-5 mt-1 hidden"><p>Consultor IA está a pesquisar...</p></div>
+                            <form id="consultant-chat-form" class="mt-2 flex gap-2">
+                                <input type="text" id="consultant-chat-input" placeholder="Faça uma pergunta técnica..." class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                                <button type="submit" class="btn-primary p-2 rounded-md flex items-center justify-center"><i data-lucide="send" class="w-5 h-5"></i></button>
+                            </form>
+                        </div>
+                        
+                        <!-- NOVA PÁGINA DA CALCULADORA -->
+                        <div id="page-calculadora" class="page-content">
+                             <div class="bg-white rounded-lg p-0 md:p-4">
+                                <header class="text-center mb-8">
+                                    <h1 class="text-3xl md:text-4xl font-bold normatic-blue-text">Calculadora de Processos</h1>
+                                    <p class="text-gray-600 mt-2">Selecione o aço, veja os parâmetros do processo e os resultados de dureza.</p>
+                                </header>
+
+                                <!-- Controles de Seleção -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-end">
+                                    <div>
+                                        <label for="calc-steel-select" class="block text-sm font-medium text-gray-700 mb-2">1. Selecione o Tipo de Aço</label>
+                                        <select id="calc-steel-select" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-2.5 transition duration-150 ease-in-out">
+                                            <option selected disabled>Escolha um aço...</option>
+                                        </select>
+                                    </div>
+                                    <div id="calc-process-info-container" class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm hidden">
+                                         <!-- Info do Processo será inserida aqui -->
+                                    </div>
+                                </div>
+
+                                <!-- Seção de Resultados -->
+                                <div id="calc-results-section" class="hidden">
+                                    <div class="mb-6">
+                                        <label for="calc-initial-hardness" class="block text-sm font-medium text-gray-700 mb-2">Dureza Máxima Pós-Têmpera</label>
+                                        <input type="text" id="calc-initial-hardness" class="w-full md:w-1/3 bg-gray-200 border border-gray-300 text-gray-900 font-bold text-center text-lg rounded-lg block p-2.5 cursor-not-allowed" readonly>
+                                    </div>
+
+                                    <h2 class="text-2xl font-bold normatic-blue-text mb-4 border-b pb-2">Resultados de Revenimento</h2>
+                                    <p class="text-sm text-gray-500 mb-4">Clique em um card para ver a conversão de dureza e a resistência à tração.</p>
+                                    <div id="calc-results-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <!-- Cards de resultado serão inseridos aqui -->
+                                    </div>
+                                     <p id="calc-no-results-message" class="text-center text-gray-500 mt-6 hidden">Nenhum dado de revenimento encontrado para este aço.</p>
+                                </div>
+                                 <div id="calc-welcome-message" class="text-center py-12">
+                                    <i data-lucide="ruler" class="mx-auto h-12 w-12 text-gray-400"></i>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">Aguardando seleção</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Selecione um tipo de aço para começar os cálculos.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="page-maquinas" class="page-content hidden">
+                            <h2 class="text-2xl font-bold normatic-blue-text mb-4">Máquinas e Ajustes</h2>
+                            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <button type="button" data-maquina="maquina-forno-camara" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Forno de Câmara (Convencional)</button>
+                                <button type="button" data-maquina="maquina-forno-inducao" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Forno de Indução</button>
+                                <button type="button" data-maquina="maquina-forno-vacuo" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Forno a Vácuo</button>
+                                <button type="button" data-maquina="maquina-forno-atmosfera" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Forno de Atmosfera Controlada</button>
+                                <button type="button" data-maquina="maquina-forno-sais" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Forno de Sais (Banho de Sais)</button>
+                                <button type="button" data-maquina="maquina-tanques-resfriamento" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Tanques de Resfriamento (Têmpera)</button>
+                                <button type="button" data-maquina="maquina-nitreta-plasma" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Equipamento de Nitretação a Plasma</button>
+                                <button type="button" data-maquina="maquina-oxidacao-negra" class="maquina-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-900 font-semibold py-3 px-4 rounded-lg shadow transition">Equipamento de Oxidação Negra</button>
+                            </div>
+                            <div id="maquina-content" class="bg-white p-6 rounded-lg shadow border">
+                                <div id="maquina-forno-camara" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Forno de Câmara (Convencional)</h3>
+                                    <p>Equipamento tradicional para tratamentos térmicos, com controle de temperatura e atmosfera para processos como têmpera, revenimento e recozimento.</p>
+                                </div>
+                                <div id="maquina-forno-inducao" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Forno de Indução</h3>
+                                    <p>Utiliza campo eletromagnético para aquecimento rápido e localizado, ideal para têmpera superficial e tratamentos seletivos.</p>
+                                </div>
+                                <div id="maquina-forno-vacuo" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Forno a Vácuo</h3>
+                                    <p>Permite tratamentos livres de oxidação, com atmosfera controlada e alta pureza, usado para têmpera, recozimento e brasagem.</p>
+                                </div>
+                                <div id="maquina-forno-atmosfera" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Forno de Atmosfera Controlada</h3>
+                                    <p>Opera com gases específicos para controlar reações químicas durante o tratamento térmico, como cementação e carbonitretação.</p>
+                                </div>
+                                <div id="maquina-forno-sais" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Forno de Sais (Banho de Sais)</h3>
+                                    <p>Utiliza banhos de sais fundidos para aquecimento uniforme e resfriamento controlado, indicado para martêmpera e austêmpera.</p>
+                                </div>
+                                <div id="maquina-tanques-resfriamento" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Tanques de Resfriamento (Têmpera)</h3>
+                                    <p>Tanques para resfriamento rápido de peças após aquecimento, usando água, óleo ou polímeros, essenciais para processos de têmpera.</p>
+                                </div>
+                                <div id="maquina-nitreta-plasma" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Equipamento de Nitretação a Plasma</h3>
+                                    <p>Realiza nitretação superficial por plasma ionizado, promovendo alta dureza e resistência ao desgaste em aços especiais.</p>
+                                </div>
+                                <div id="maquina-oxidacao-negra" class="maquina-details hidden">
+                                    <h3 class="text-xl font-bold mb-2">Equipamento de Oxidação Negra</h3>
+                                    <p>Promove formação de camada protetora de óxidos, aumentando resistência à corrosão e melhorando acabamento superficial.</p>
+                                </div>
+                            </div>
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.querySelectorAll('.maquina-btn').forEach(function(btn) {
+                                    btn.addEventListener('click', function() {
+                                        document.querySelectorAll('.maquina-details').forEach(function(detail) {
+                                            detail.classList.add('hidden');
+                                        });
+                                        var target = this.getAttribute('data-maquina');
+                                        var el = document.getElementById(target);
+                                        if (el) el.classList.remove('hidden');
+                                    });
+                                });
+                            });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Conversão da Calculadora -->
+    <div id="calc-conversion-modal" class="fixed inset-0 z-50 overflow-y-auto items-center justify-center hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+            <div id="calc-modal-backdrop" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div id="calc-modal-content" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all my-8 max-w-sm w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="info" class="h-6 w-6 text-blue-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="calc-modal-title">Conversão de Dureza</h3>
+                            <div class="mt-4 space-y-3" id="calc-modal-body">
+                                <!-- Conteúdo da conversão -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="calc-close-modal-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="https://wa.me/554191485285" target="_blank" id="whatsapp-button" class="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-transform hover:scale-110 z-40 flex items-center justify-center">
+        <i class="fab fa-whatsapp fa-2x"></i>
+    </a>
+    <div id="confirmation-message" class="hidden fixed top-24 right-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 fade-in" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5"></i>
+        <span id="confirmation-text" class="font-medium"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.triggerDownload = (fileName, fileContent) => {
+                // If there's no real content, create a simulation file for demonstration
+                if (!fileContent) {
+                    const dummyContent = `This is a simulation file for: ${fileName}\n\nTest file content.`;
+                    const blob = new Blob([dummyContent], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    return;
+                }
+    
+                // Helper function to convert Data URL to Blob
+                function dataURLtoBlob(dataurl) {
+                    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                    while(n--){
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    return new Blob([u8arr], {type:mime});
+                }
+    
+                try {
+                    const blob = dataURLtoBlob(fileContent);
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    console.error("Error creating file for download:", e);
+                    alert("An error occurred while trying to prepare the download.");
+                }
+            };
+            
+            // --- LÓGICA DO MENU HAMBURGUER ---
+            const hamburgerButton = document.getElementById('hamburger-button');
+            const mainMenu = document.getElementById('main-menu-list');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            if (hamburgerButton && mainMenu && menuIcon && closeIcon) {
+                hamburgerButton.addEventListener('click', () => {
+                    mainMenu.classList.toggle('menu-open');
+                    menuIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                });
+            }
+
+            // --- BANCO DE DADOS E ESTADO GLOBAL ---
+            let currentUser = null;
+            let currentOrderStatus = '';
+            let currentUserData = {};
+            let navigationHistory = [];
+            let currentPageId = null;
+            let chatHistory = [];
+            let consultantChatHistory = [];
+            
+            // Simulação de banco de dados de arquivos (sem conteúdo inicial para os dados de exemplo)
+            let mockUploadedFiles = [
+                { docId: 'cert1', clientId: 'cliente1', orderId: '67890', type: 'Certificado', fileName: 'Certificado_Qualidade_Pedido_67890.pdf', date: '20/08/2025' },
+                { docId: 'os1', clientId: 'cliente1', orderId: '67890', type: 'Ordem de Serviço', fileName: 'OS_Pedido_67890.pdf', date: '18/08/2025' },
+                { docId: 'ped1', clientId: 'cliente1', orderId: '67890', type: 'Pedido', fileName: 'Pedido_Cliente_67890.pdf', date: '17/08/2025' },
+                { docId: 'cert2', clientId: 'cliente1', orderId: '11223', type: 'Certificado', fileName: 'Certificado_Qualidade_Pedido_11223.pdf', date: '15/08/2025' },
+            ];
+
+            const mockDatabase = { "12345": { status: "Em Produção", deliveryDate: "30/08/2025", lastUpdate: "26/08/2025 10:15" }, "67890": { status: "Concluído", deliveryDate: "25/08/2025", lastUpdate: "24/08/2025 18:00" }, "54321": { status: "Aguardando Material", deliveryDate: "05/09/2025", lastUpdate: "25/08/2025 09:30" }};
+            const mockHistoryData = [{ id: "67890", date: "20/08/2025", status: "Concluído" },{ id: "11223", date: "15/08/2025", status: "Concluído" },{ id: "44556", date: "02/08/2025", status: "Concluído" }];
+            const treatmentOptions = { construcao_mecanica: ["Têmpera", "Beneficiamento", "Revenimento", "Martêmpera", "Carbonitretação", "Cementação", "Nitretação", "Alívio de tensões", "Recozimento", "Normalização", "Têmpera por indução", "Processo de Oxidação Negra", "Tufftride"], ferramenta_especiais: ["Têmpera a vácuo", "Triplo Revenimento", "Revenimento a vácuo", "Alívio de tensão a vácuo para acabamento brilhante (bright stress relief)", "Envelhecimento a vácuo", "Solubilização a vácuo", "Recozimento total ou pleno", "Recozimento isotérmico a vácuo", "Nitretação a plasma"], ferros_fundidos: ["Austêmpera", "Têmpera", "Têmpera por indução", "Nitretação", "Normalização", "Perlitização", "Recozimento"] };
+
+            // --- ELEMENTOS DO DOM ---
+            const landingPageView = document.getElementById('landing-page-view');
+            const clientPortalWrapper = document.getElementById('client-portal-wrapper');
+            const loginAreaButton = document.getElementById('login-area-button');
+            const portalToggleButton = document.getElementById('portal-toggle-button');
+            const portalActionsContainer = document.getElementById('portal-actions-container');
+            const homeLogoLink = document.getElementById('home-logo-link');
+            const mainNav = document.getElementById('main-nav');
+            const loginView = document.getElementById('login-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            const loginForm = document.getElementById('login-form');
+            const userInfo = document.getElementById('user-info');
+            const usernameDisplay = document.getElementById('username-display');
+            const logoutButton = document.getElementById('logout-button');
+            const clientNav = document.getElementById('client-nav');
+            const gestorNav = document.getElementById('gestor-nav');
+            const adminNav = document.getElementById('admin-nav');
+            const collaboratorNav = document.getElementById('collaborator-nav');
+            const confirmationMessage = document.getElementById('confirmation-message');
+            const confirmationText = document.getElementById('confirmation-text');
+            const previousFunctionButton = document.getElementById('previous-function-button');
+            const whatsappButton = document.getElementById('whatsapp-button');
+            let confirmationTimeout;
+
+             // --- LÓGICA DA API GEMINI ---
+            const apiKey = "AIzaSyBMUB0g0jqATM0GO3AWtG4UOuNaDk77zAQ"; // A chave será fornecida pelo ambiente em tempo de execução.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            async function callGeminiAPI(userQuery, systemPrompt, retries = 3, delay = 1000) {
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                };
+
+                if (systemPrompt) {
+                     payload.systemInstruction = {
+                        parts: [{ text: systemPrompt }]
+                    };
+                }
+
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const candidate = result.candidates?.[0];
+
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            return candidate.content.parts[0].text;
+                        } else {
+                            throw new Error("Resposta da API inválida ou sem texto.");
+                        }
+                    } catch (error) {
+                        console.error(`Attempt ${i + 1} failed:`, error);
+                        if (i < retries - 1) {
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2; // Exponential backoff
+                        } else {
+                            return "Desculpe, não consigo responder no momento. Por favor, tente novamente mais tarde.";
+                        }
+                    }
+                }
+            }
+
+            // --- LÓGICA DE VISIBILIDADE DO BOTÃO WHATSAPP ---
+            function updateWhatsappVisibility() {
+                const isLandingVisible = !landingPageView.classList.contains('hidden');
+                const isLoginVisible = !loginView.classList.contains('hidden');
+
+                if (isLandingVisible) {
+                    whatsappButton.classList.remove('hidden');
+                } else if (isLoginVisible) {
+                    whatsappButton.classList.add('hidden');
+                } else if (currentUser) {
+                    if (currentUser.profile === 'client') {
+                        whatsappButton.classList.remove('hidden');
+                    } else {
+                        whatsappButton.classList.add('hidden');
+                    }
+                } else {
+                    whatsappButton.classList.add('hidden');
+                }
+            }
+            
+            // --- LÓGICA DE LOGIN E NAVEGAÇÃO PRINCIPAL ---
+            loginAreaButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                landingPageView.classList.add('hidden');
+                clientPortalWrapper.classList.remove('hidden');
+                mainNav.classList.add('hidden');
+                portalActionsContainer.classList.remove('hidden');
+                portalActionsContainer.classList.add('flex');
+                updateWhatsappVisibility();
+            });
+            homeLogoLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) return;
+                clientPortalWrapper.classList.add('hidden');
+                landingPageView.classList.remove('hidden');
+                mainNav.classList.remove('hidden');
+                portalActionsContainer.classList.add('hidden');
+                portalActionsContainer.classList.remove('flex');
+                updateWhatsappVisibility();
+            });
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const username = document.getElementById('username').value.trim();
+                const userType = document.querySelector('input[name="userType"]:checked').value;
+                if (username) {
+                    currentUser = { 
+                        username, 
+                        profile: userType,
+                        id: userType === 'client' ? username : (userType === 'admin' ? 'admin1' : 'user_generic')
+                    };
+                    loginView.classList.add('hidden');
+                    dashboardView.classList.remove('hidden');
+                    dashboardView.classList.add('fade-in');
+                    document.getElementById('header-auth-section').classList.add('hidden');
+                    userInfo.classList.remove('hidden');
+                    userInfo.classList.add('flex');
+                    usernameDisplay.textContent = username;
+                    portalActionsContainer.classList.remove('hidden');
+                    portalActionsContainer.classList.add('flex');
+                    
+                    clientNav.classList.add('hidden');
+                    gestorNav.classList.add('hidden');
+                    adminNav.classList.add('hidden');
+                    collaboratorNav.classList.add('hidden');
+
+                    if (userType === 'client') { clientNav.classList.remove('hidden'); loadUserData(); showPage('consulta'); } 
+                    else if (userType === 'gestor') { gestorNav.classList.remove('hidden'); showPage('dashboard'); }
+                    else if (userType === 'admin') { adminNav.classList.remove('hidden'); showPage('uploads'); } 
+                    else if (userType === 'collaborator') { collaboratorNav.classList.remove('hidden'); showPage('consultor-ia'); }
+                    updateWhatsappVisibility();
+                }
+            });
+            logoutButton.addEventListener('click', () => {
+                currentUser = null;
+                clientPortalWrapper.classList.add('hidden');
+                landingPageView.classList.remove('hidden');
+                mainNav.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                document.getElementById('header-auth-section').classList.remove('hidden');
+                portalActionsContainer.classList.add('hidden');
+                portalActionsContainer.classList.remove('flex');
+                navigationHistory = [];
+                currentPageId = null;
+                portalToggleButton.innerHTML = `<i data-lucide="arrow-left" class="w-5 h-5"></i><span>Voltar ao Site</span>`;
+                lucide.createIcons();
+                loginView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+                loginForm.reset();
+                updateWhatsappVisibility();
+            });
+
+            portalToggleButton.addEventListener('click', () => {
+                const isPortalVisible = !clientPortalWrapper.classList.contains('hidden');
+                if (isPortalVisible) {
+                    clientPortalWrapper.classList.add('hidden');
+                    landingPageView.classList.remove('hidden');
+                    mainNav.classList.remove('hidden');
+                    if (currentUser) {
+                        portalToggleButton.innerHTML = `<i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Acessar Portal</span>`;
+                    } else {
+                        portalActionsContainer.classList.add('hidden');
+                        portalActionsContainer.classList.remove('flex');
+                    }
+                } else {
+                    landingPageView.classList.add('hidden');
+                    clientPortalWrapper.classList.remove('hidden');
+                    mainNav.classList.add('hidden');
+                    portalToggleButton.innerHTML = `<i data-lucide="arrow-left" class="w-5 h-5"></i><span>Voltar ao Site</span>`;
+                }
+                lucide.createIcons();
+                updateWhatsappVisibility();
+            });
+
+            previousFunctionButton.addEventListener('click', () => {
+                if (navigationHistory.length > 0) {
+                    const previousPageId = navigationHistory.pop();
+                    showPage(previousPageId, true); 
+                }
+            });
+            
+            // --- LÓGICA DE NAVEGAÇÃO INTERNA (MENUS LATERAIS) ---
+            const navItems = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page-content');
+            function showPage(pageId, isNavigatingBack = false) {
+                if (pageId === currentPageId) return; 
+
+                if (!isNavigatingBack && currentPageId) {
+                    navigationHistory.push(currentPageId);
+                }
+
+                pages.forEach(page => page.classList.remove('active'));
+                const activePage = document.getElementById(`page-${pageId}`);
+                if (activePage) activePage.classList.add('active');
+                
+                navItems.forEach(item => { 
+                    item.classList.remove('active'); 
+                    if (item.getAttribute('href') === `#${pageId}`) item.classList.add('active'); 
+                });
+
+                currentPageId = pageId;
+
+                if (pageId === 'historico') renderHistory();
+                if (pageId === 'downloads') renderDownloads();
+                if (pageId === 'orcamento') updateTreatmentOptions();
+                if (pageId === 'coleta') document.getElementById('pickup-address').value = currentUserData.defaultPickup || currentUserData.address || '';
+                if (pageId === 'entrega') document.getElementById('delivery-address').value = currentUserData.defaultDelivery || currentUserData.address || '';
+                if (pageId === 'chat' && document.getElementById('chat-window').children.length === 0) {
+                    addChatMessage('Olá! Sou o assistente virtual da Normatic, otimizado com a IA da Gemini. Em que posso ser útil hoje?', 'ai');
+                    chatHistory = [];
+                }
+                if (pageId === 'consultor-ia' && document.getElementById('consultant-chat-window').children.length === 0) {
+                    addConsultantChatMessage('Olá! Sou seu consultor técnico de IA. Posso ajudar com dúvidas sobre tratamentos, normas e processos internos. Como posso ajudar?', 'ai');
+                    consultantChatHistory = [];
+                }
+                if (pageId.startsWith('dashboard') || ['qualidade', 'expedicao', 'tratamentos', 'financeiro', 'rh'].includes(pageId)) renderDashboardCharts(pageId);
+                if (pageId === 'calculadora') initializeCalculatorApp();
+                if (pageId === 'uploads') lucide.createIcons();
+            }
+            navItems.forEach(item => { item.addEventListener('click', (e) => { e.preventDefault(); const pageId = e.currentTarget.getAttribute('href').substring(1); showPage(pageId); }); });
+
+             // --- LÓGICA DAS PÁGINAS DO CLIENTE E ADMIN ---
+            function showConfirmation(message) {
+                if (confirmationTimeout) clearTimeout(confirmationTimeout);
+                confirmationText.textContent = message;
+                confirmationMessage.classList.remove('hidden');
+                confirmationTimeout = setTimeout(() => { confirmationMessage.classList.add('hidden'); }, 3000);
+            }
+             function updateTreatmentOptions() {
+                const metalTypeSelect = document.getElementById('metal-type');
+                const treatmentTypeSelect = document.getElementById('treatment-type');
+                const selectedMetalType = metalTypeSelect.value;
+                const options = treatmentOptions[selectedMetalType] || [];
+                treatmentTypeSelect.innerHTML = '';
+                options.forEach(optionText => { treatmentTypeSelect.innerHTML += `<option value="${optionText}">${optionText}</option>`; });
+            }
+            document.getElementById('metal-type').addEventListener('change', updateTreatmentOptions);
+            function loadUserData() {
+                const savedData = localStorage.getItem('userData');
+                if (savedData) {
+                    currentUserData = JSON.parse(savedData);
+                    document.getElementById('user-name').value = currentUserData.name || '';
+                    document.getElementById('user-address').value = currentUserData.address || '';
+                    document.getElementById('user-phone').value = currentUserData.phone || '';
+                    document.getElementById('user-email').value = currentUserData.email || '';
+                    document.getElementById('user-default-delivery').value = currentUserData.defaultDelivery || '';
+                    document.getElementById('user-default-pickup').value = currentUserData.defaultPickup || '';
+                }
+            }
+            function renderHistory() {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
+                if(mockHistoryData.length === 0) { historyList.innerHTML = '<p class="text-gray-500">Nenhum pedido no histórico.</p>'; return; }
+                mockHistoryData.forEach(order => {
+                    historyList.innerHTML += `<div class="bg-white p-4 rounded-md border flex justify-between items-center"><div><p class="font-bold text-gray-800">Pedido #${order.id}</p><p class="text-sm text-gray-500">Data: ${order.date}</p></div><span class="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">${order.status}</span></div>`;
+                });
+            }
+
+            function renderDownloads() {
+                const downloadsContainer = document.getElementById('page-downloads');
+                downloadsContainer.innerHTML = `
+                    <h2 class="text-2xl font-bold normatic-blue-text mb-2">Downloads</h2>
+                    <p class="text-gray-500 mb-6">Filtre e baixe os documentos relacionados aos seus pedidos.</p>
+                    <div class="mb-6">
+                        <label for="doc-type-filter" class="block text-sm font-medium text-gray-700">Filtrar por tipo de documento:</label>
+                        <select id="doc-type-filter" class="mt-1 block w-full md:w-1/3 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500">
+                            <option value="todos">Todos os Tipos</option>
+                            <option value="Certificado">Certificado</option>
+                            <option value="Ordem de Serviço">Ordem de Serviço</option>
+                            <option value="Pedido">Pedido</option>
+                            <option value="Laudo">Laudo</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div id="downloads-list" class="space-y-4"></div>
+                `;
+
+                const filterSelect = document.getElementById('doc-type-filter');
+                const listContainer = document.getElementById('downloads-list');
+
+                function updateList() {
+                    const filterValue = filterSelect.value;
+                    listContainer.innerHTML = '';
+
+                    const userFiles = mockUploadedFiles.filter(file => file.clientId === currentUser.id);
+                    const filteredFiles = filterValue === 'todos' ? userFiles : userFiles.filter(file => file.type === filterValue);
+
+                    if (filteredFiles.length === 0) {
+                        listContainer.innerHTML = '<div class="bg-white p-4 rounded-md border text-center"><p class="text-gray-500">Nenhum documento encontrado para este filtro.</p></div>';
+                        return;
+                    }
+
+                    filteredFiles.forEach(file => {
+                        const itemContainer = document.createElement('div');
+                        itemContainer.className = 'bg-white p-4 rounded-md border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3';
+
+                        const infoDiv = document.createElement('div');
+                        infoDiv.innerHTML = `
+                            <p class="font-bold text-gray-800 flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-5 h-5 text-gray-500"></i>
+                                ${file.fileName}
+                            </p>
+                            <p class="text-sm text-gray-500 ml-7">
+                                <span class="font-medium">Tipo:</span> ${file.type} | 
+                                <span class="font-medium">Pedido:</span> ${file.orderId || 'N/A'} | 
+                                <span class="font-medium">Data:</span> ${file.date}
+                            </p>
+                        `;
+
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = '#';
+                        downloadLink.className = 'btn-primary !py-2 !px-4 text-sm w-full sm:w-auto text-center';
+                        downloadLink.innerHTML = `<i data-lucide="download" class="w-4 h-4 inline-block -mt-1 mr-1"></i> Baixar`;
+                        
+                        downloadLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            triggerDownload(file.fileName, file.fileContent);
+                        });
+
+                        itemContainer.appendChild(infoDiv);
+                        itemContainer.appendChild(downloadLink);
+                        listContainer.appendChild(itemContainer);
+                    });
+                    
+                    lucide.createIcons();
+                }
+
+                filterSelect.addEventListener('change', updateList);
+                updateList(); // Renderização inicial
+            }
+
+            // Event Listeners para formulários
+            document.getElementById('quote-form').addEventListener('submit', (e) => { e.preventDefault(); showConfirmation("Solicitação de orçamento enviada!"); e.target.reset(); });
+            document.getElementById('pickup-form').addEventListener('submit', (e) => { e.preventDefault(); showConfirmation("Coleta agendada!"); e.target.reset(); });
+            document.getElementById('delivery-form').addEventListener('submit', (e) => { e.preventDefault(); showConfirmation("Entrega agendada!"); e.target.reset(); });
+            document.getElementById('user-data-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                currentUserData = { name: document.getElementById('user-name').value, address: document.getElementById('user-address').value, phone: document.getElementById('user-phone').value, email: document.getElementById('user-email').value, defaultDelivery: document.getElementById('user-default-delivery').value, defaultPickup: document.getElementById('user-default-pickup').value };
+                localStorage.setItem('userData', JSON.stringify(currentUserData));
+                showConfirmation("Dados atualizados!");
+            });
+
+            // Lógica do Upload (Administrador)
+            const uploadForm = document.getElementById('upload-form');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const clientId = document.getElementById('upload-client-id').value.trim();
+                    const orderId = document.getElementById('upload-order-id').value.trim();
+                    const docType = document.getElementById('upload-doc-type').value;
+                    const fileInput = document.getElementById('upload-file');
+                    
+                    if (!clientId || !docType || fileInput.files.length === 0) {
+                        alert('Por favor, preencha o ID do Cliente, Tipo e selecione um arquivo.');
+                        return;
+                    }
+
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        const fileContent = event.target.result; // Conteúdo do arquivo como Data URL
+
+                        mockUploadedFiles.unshift({ 
+                            docId: `doc${Date.now()}`,
+                            clientId: clientId,
+                            orderId: orderId,
+                            type: docType,
+                            fileName: file.name,
+                            fileContent: fileContent, // Armazena o conteúdo
+                            date: new Date().toLocaleDateString('pt-BR')
+                        });
+
+                        showConfirmation(`Documento "${file.name}" enviado com sucesso!`);
+                        e.target.reset();
+                        console.log("Arquivos simulados:", mockUploadedFiles);
+                    };
+
+                    reader.readAsDataURL(file); // Lê o arquivo como Data URL
+                });
+            }
+
+
+            // Lógica do Chat do Cliente
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const chatWindow = document.getElementById('chat-window');
+            const aiTypingIndicator = document.getElementById('ai-typing-indicator');
+
+            function addChatMessage(message, sender) {
+                const bubbleClass = sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+                const justifyClass = sender === 'user' ? 'justify-end' : 'justify-start';
+                chatWindow.innerHTML += `<div class="flex ${justifyClass}"><div class="chat-bubble p-3 rounded-lg ${bubbleClass}">${message}</div></div>`;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+                if (!userMessage) return;
+
+                addChatMessage(userMessage, 'user');
+                chatInput.value = '';
+                aiTypingIndicator.classList.remove('hidden');
+                chatForm.querySelector('button').disabled = true;
+
+                const systemPrompt = `Você é um assistente virtual da Normatic, uma empresa especialista em tratamentos térmicos de metais. Seja prestativo e amigável. Responda às perguntas dos clientes sobre a empresa, serviços (têmpera, revenimento, etc.) e processos. Use formatação Markdown (negrito com **, listas com *) quando apropriado para melhor clareza. Não invente status de pedidos; oriente o usuário a usar a ferramenta de 'Consulta de Pedido'. O telefone de contato da empresa é +55 41 3283-4556; o whatsapp é +55 41 99148-5285; o endereço é: R. Anselmo Vaccari, 254 - Àguas Belas, São José dos Pinhais - PR | 83.040-580; o e-mail é:comercial@normatic.com.br.`;
+                const aiResponse = await callGeminiAPI(userMessage, systemPrompt);
+
+                const aiHtmlResponse = marked.parse(aiResponse);
+                addChatMessage(aiHtmlResponse, 'ai');
+                aiTypingIndicator.classList.add('hidden');
+                chatForm.querySelector('button').disabled = false;
+            });
+
+            // --- NOVA LÓGICA DO CONSULTOR TÉCNICO IA ---
+            const consultantChatForm = document.getElementById('consultant-chat-form');
+            const consultantChatInput = document.getElementById('consultant-chat-input');
+            const consultantChatWindow = document.getElementById('consultant-chat-window');
+            const consultantAiTypingIndicator = document.getElementById('consultant-ai-typing-indicator');
+
+            function addConsultantChatMessage(message, sender) {
+                const bubbleClass = sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+                const justifyClass = sender === 'user' ? 'justify-end' : 'justify-start';
+                consultantChatWindow.innerHTML += `<div class="flex ${justifyClass}"><div class="chat-bubble p-3 rounded-lg ${bubbleClass}">${message}</div></div>`;
+                consultantChatWindow.scrollTop = consultantChatWindow.scrollHeight;
+            }
+
+            function getTechnicalContext() {
+                const instrucoes = document.getElementById('page-instrucoes')?.textContent || '';
+                const normas = document.getElementById('page-normas')?.textContent || '';
+                const maquinas = document.getElementById('page-maquinas')?.textContent || '';
+                return `INSTRUÇÕES INTERNAS:\n${instrucoes}\n\nNORMAS TÉCNICAS INTERNAS:\n${normas}\n\nMÁQUINAS E AJUSTES INTERNOS:\n${maquinas}`;
+            }
+
+            consultantChatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = consultantChatInput.value.trim();
+                if (!userMessage) return;
+
+                addConsultantChatMessage(userMessage, 'user');
+                consultantChatInput.value = '';
+                consultantAiTypingIndicator.classList.remove('hidden');
+                consultantChatForm.querySelector('button').disabled = true;
+
+                const technicalContext = getTechnicalContext();
+                const systemPrompt = `Você é um consultor técnico especialista em tratamentos térmicos de metais para a empresa Normatic. Sua função é auxiliar colaboradores internos. Responda de forma precisa e técnica. Utilize a documentação interna fornecida como fonte primária de informação. Se a documentação não for suficiente, busque normas técnicas (ABNT, ASTM, SAE, DIN, etc.) na internet para complementar a resposta. Use formatação Markdown para clareza (tópicos, negrito, tabelas).`;
+                
+                const finalQuery = `Baseado na documentação interna abaixo e, se necessário, em pesquisas externas de normas técnicas, responda a seguinte pergunta:\n\n---DOCUMENTAÇÃO INTERNA---\n${technicalContext}\n\n---PERGUNTA DO COLABORADOR---\n"${userMessage}"`;
+
+                const aiResponse = await callGeminiAPI(finalQuery, systemPrompt);
+
+                const aiHtmlResponse = marked.parse(aiResponse);
+                addConsultantChatMessage(aiHtmlResponse, 'ai');
+                consultantAiTypingIndicator.classList.add('hidden');
+                consultantChatForm.querySelector('button').disabled = false;
+            });
+
+
+            // Lógica de Consulta de Pedido (AGORA COM GEMINI E MARKED.JS)
+            const nextStepsButton = document.getElementById('next-steps-button');
+
+            function updateTimeline(status) {
+                const statusMap = { 'Pedido Recebido': 0, 'Aguardando Material': 1, 'Em Produção': 2, 'Controle de Qualidade': 3, 'Concluído': 4 };
+                const currentStepIndex = statusMap[status] !== undefined ? statusMap[status] : -1;
+                
+                document.querySelectorAll('.timeline-step').forEach((stepEl, index) => {
+                    stepEl.classList.remove('active', 'completed');
+                    const timeEl = stepEl.querySelector('time');
+                    timeEl.textContent = ''; 
+
+                    if (index < currentStepIndex) {
+                        stepEl.classList.add('completed');
+                        timeEl.textContent = `Concluído`;
+                    } else if (index === currentStepIndex) {
+                        stepEl.classList.add('active');
+                        timeEl.textContent = `Etapa atual`;
+                    }
+                });
+                lucide.createIcons();
+            }
+
+            document.getElementById('search-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orderId = document.getElementById('order-id').value.trim();
+                if (!orderId) return;
+
+                const searchButton = e.target.querySelector('button');
+                const buttonText = searchButton.querySelector('span');
+                const loadingSpinner = searchButton.querySelector('#loading-spinner');
+                
+                buttonText.textContent = 'A buscar...';
+                searchButton.disabled = true;
+                loadingSpinner.classList.remove('hidden');
+                
+                await new Promise(res => setTimeout(res, 1000)); // Simula delay
+                
+                buttonText.textContent = 'Buscar';
+                searchButton.disabled = false;
+                loadingSpinner.classList.add('hidden');
+
+                const data = mockDatabase[orderId];
+                const resultContainer = document.getElementById('result-container');
+                const successResult = document.getElementById('success-result');
+                const errorMessage = document.getElementById('error-message');
+                const geminiSummaryContainer = document.getElementById('gemini-summary-container');
+                const geminiSummaryLoader = document.getElementById('gemini-summary-loader');
+                const geminiSummaryText = document.getElementById('gemini-summary-text');
+                const geminiNextStepsContainer = document.getElementById('gemini-next-steps-container');
+
+                resultContainer.classList.remove('hidden');
+                geminiSummaryContainer.classList.add('hidden');
+                geminiNextStepsContainer.classList.add('hidden');
+                geminiSummaryText.classList.add('hidden');
+
+
+                if(data) {
+                    successResult.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+                    document.getElementById('result-order-id').textContent = `#${orderId}`;
+                    document.getElementById('status').textContent = data.status;
+                    document.getElementById('delivery-date').textContent = data.deliveryDate;
+                    document.getElementById('last-update').textContent = data.lastUpdate;
+                    
+                    updateTimeline(data.status);
+                    currentOrderStatus = data.status;
+
+                    geminiSummaryContainer.classList.remove('hidden');
+                    geminiSummaryLoader.classList.remove('hidden');
+                    const summaryPrompt = `Crie um resumo amigável e conciso para um cliente sobre o seu pedido. O status atual é '${data.status}' e a previsão de entrega é '${data.deliveryDate}'. Seja otimista e claro.`;
+                    const summary = await callGeminiAPI(summaryPrompt);
+                    geminiSummaryText.innerHTML = marked.parse(summary);
+                    geminiSummaryLoader.classList.add('hidden');
+                    geminiSummaryText.classList.remove('hidden');
+
+                } else {
+                    successResult.classList.add('hidden');
+                    errorMessage.classList.remove('hidden');
+                    errorMessage.querySelector('p').textContent = "Pedido não encontrado.";
+                }
+            });
+
+            nextStepsButton.addEventListener('click', async () => {
+                const nextStepsContainer = document.getElementById('gemini-next-steps-container');
+                const nextStepsLoader = document.getElementById('gemini-next-steps-loader');
+                const nextStepsText = document.getElementById('gemini-next-steps-text');
+                
+                nextStepsContainer.classList.remove('hidden');
+                nextStepsText.classList.add('hidden');
+                nextStepsLoader.classList.remove('hidden');
+
+                const nextStepsPrompt = `O status de um pedido na minha empresa de tratamento térmico é '${currentOrderStatus}'. Explique para o cliente, de forma simples, direta e em 1 ou 2 frases, qual é a próxima etapa do processo de produção.`;
+                const explanation = await callGeminiAPI(nextStepsPrompt);
+
+                nextStepsText.innerHTML = marked.parse(explanation);
+                nextStepsLoader.classList.add('hidden');
+                nextStepsText.classList.remove('hidden');
+            });
+
+
+            // Lógica dos Gráficos do Dashboard
+            let chartInstances = {};
+            function renderDashboardCharts(pageId) {
+                const chartConfigs = {
+                    'dashboard': [
+                        { id: 'ordersChart', type: 'bar', data: { labels: ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'], datasets: [{ label: 'Nº de Pedidos', data: [5, 9, 7, 8, 6, 12], backgroundColor: 'rgba(23, 60, 88, 0.8)' }] } },
+                        { id: 'treatmentsChart', type: 'doughnut', data: { labels: ['Têmpera', 'Revenimento', 'Cementação', 'Outros'], datasets: [{ data: [40, 25, 15, 20], backgroundColor: ['rgba(202, 56, 40, 0.9)', 'rgba(23, 60, 88, 0.9)', 'rgba(202, 56, 40, 0.7)', 'rgba(23, 60, 88, 0.7)'] }] } }
+                    ],
+                    'qualidade': [{ id: 'qualidadeChart', type: 'line', data: { labels: ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'], datasets: [{ label: 'Índice de Conformidade (%)', data: [99.5, 99.6, 99.7, 99.5, 99.8, 99.8], borderColor: 'rgba(23, 60, 88, 1)' }] } }],
+                    'expedicao': [{ id: 'expedicaoChart', type: 'bar', data: { labels: ['Transp. A', 'Transp. B', 'Transp. C'], datasets: [{ label: 'Pedidos Entregues', data: [120, 88, 45], backgroundColor: 'rgba(202, 56, 40, 0.8)' }] } }],
+                    'tratamentos': [{ id: 'tratamentosChart', type: 'pie', data: { labels: ['Forno A', 'Forno B', 'Forno a Vácuo'], datasets: [{ data: [50, 35, 15], backgroundColor: ['rgba(23, 60, 88, 0.9)', 'rgba(202, 56, 40, 0.9)', 'rgba(23, 60, 88, 0.7)'] }] } }],
+                    'financeiro': [{ id: 'financeiroChart', type: 'line', data: { labels: ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'], datasets: [{ label: 'Faturação (R$ k)', data: [1100, 1150, 1210, 1180, 1250, 1200], borderColor: 'rgba(23, 60, 88, 1)' }, { label: 'Custos (R$ k)', data: [850, 880, 910, 900, 940, 920], borderColor: 'rgba(202, 56, 40, 1)' }] } }],
+                    'rh': [{ id: 'rhChart', type: 'bar', data: { labels: ['Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'], datasets: [{ label: 'Contratações', data: [2, 1, 3, 2, 1, 4], backgroundColor: 'rgba(23, 60, 88, 0.8)' }, { label: 'Desligamentos', data: [1, 0, 1, 2, 0, 1], backgroundColor: 'rgba(202, 56, 40, 0.8)' }] } }]
+                };
+                const configsToRender = chartConfigs[pageId];
+                if (!configsToRender) return;
+                
+                configsToRender.forEach(config => {
+                    const ctx = document.getElementById(config.id)?.getContext('2d');
+                    if (!ctx) return;
+                    if (chartInstances[config.id]) chartInstances[config.id].destroy();
+                    chartInstances[config.id] = new Chart(ctx, { type: config.type, data: config.data, options: { responsive: true } });
+                });
+            }
+            
+             // --- NOVA LÓGICA PARA A CALCULADORA DE PROCESSOS ---
+            function initializeCalculatorApp() {
+                const page = document.getElementById('page-calculadora');
+                if (!page || page.dataset.initialized) return;
+
+                const steelDataCalc = {
+                    "Aços para Beneficiamento": {
+                        "SAE 1030": { maxHardness: "62 HRC", processInfo: { temp: "860-900°C", cooling: "Água" }, treatments: { "180°C": "60", "200°C": "56", "250°C": "54", "300°C": "52", "350°C": "50", "400°C": "47", "450°C": "44", "500°C": "37", "550°C": "34", "600°C": "30", "650°C": "25" } },
+                        "SAE 1045": { maxHardness: "62 HRC", processInfo: { temp: "840-880°C", cooling: "Água / Martêmpera" }, treatments: { "180°C": "61", "200°C": "58", "250°C": "55", "300°C": "52", "350°C": "47", "400°C": "43", "450°C": "38", "500°C": "35", "550°C": "30", "600°C": "25", "650°C": "19" } },
+                        "SAE 1050": { maxHardness: "63 HRC", processInfo: { temp: "820-860°C", cooling: "Água / Martêmpera" }, treatments: { "180°C": "61", "200°C": "59", "250°C": "57", "300°C": "55", "350°C": "52", "400°C": "48", "450°C": "46", "500°C": "40", "550°C": "38", "600°C": "33", "650°C": "25" } },
+                        "SAE 1060": { maxHardness: "62 HRC", processInfo: { temp: "820-860°C", cooling: "Martêmpera" }, treatments: { "180°C": "60", "200°C": "58", "250°C": "55", "300°C": "53", "350°C": "48", "400°C": "45", "450°C": "40", "500°C": "35", "550°C": "30", "600°C": "25", "650°C": "19" } },
+                        "SAE 4140": { maxHardness: "58 HRC", processInfo: { temp: "840-880°C", cooling: "Martêmpera" }, treatments: { "180°C": "58", "200°C": "57", "250°C": "56", "300°C": "54", "350°C": "52", "400°C": "49", "450°C": "46", "500°C": "42", "550°C": "38", "600°C": "35", "650°C": "28" } },
+                        "SAE 4340": { maxHardness: "58 HRC", processInfo: { temp: "830-870°C", cooling: "Martêmpera" }, treatments: { "180°C": "58", "200°C": "57", "250°C": "56", "300°C": "54", "350°C": "52", "400°C": "49", "450°C": "46", "500°C": "42", "550°C": "38", "600°C": "35", "650°C": "28" } },
+                        "SAE 5160": { maxHardness: "55 HRC", processInfo: { temp: "830-870°C", cooling: "Martêmpera" }, treatments: { "180°C": "55", "200°C": "54", "250°C": "53", "300°C": "51", "350°C": "50", "400°C": "48", "450°C": "44", "500°C": "40", "550°C": "35", "600°C": "32", "650°C": "25" } },
+                        "SAE 6150": { maxHardness: "58 HRC", processInfo: { temp: "850-890°C", cooling: "Martêmpera" }, treatments: { "180°C": "54", "200°C": "52", "250°C": "48", "300°C": "45", "350°C": "43", "400°C": "40", "450°C": "37", "500°C": "35", "550°C": "33", "600°C": "31", "650°C": "29" } },
+                        "SAE 8640": { maxHardness: "56 HRC", processInfo: { temp: "830-870°C", cooling: "Martêmpera" }, treatments: { "180°C": "56", "200°C": "54", "250°C": "53", "300°C": "51", "350°C": "50", "400°C": "48", "450°C": "44", "500°C": "40", "550°C": "35", "600°C": "32", "650°C": "28" } },
+                        "SAE 9260": { maxHardness: "60 HRC", processInfo: { temp: "840-880°C", cooling: "Martêmpera" }, treatments: { "180°C": "60", "200°C": "58", "250°C": "57", "300°C": "56", "350°C": "54", "400°C": "52", "450°C": "49", "500°C": "46", "550°C": "42", "600°C": "35", "650°C": "28" } },
+                    },
+                    "Aços para Cementação": {
+                        "SAE 8620": { maxHardness: "64 HRC", processInfo: { temp: "900-930°C", cooling: "Martêmpera" }, treatments: { "180°C": "63", "200°C": "60", "250°C": "58", "300°C": "57", "350°C": "53", "400°C": "50", "500°C": "45", "600°C": "40" } },
+                        "SAE 4320": { maxHardness: "64 HRC", processInfo: { temp: "900-930°C", cooling: "Martêmpera" }, treatments: { "180°C": "63", "200°C": "61", "250°C": "58", "300°C": "57", "350°C": "53", "400°C": "50", "500°C": "45", "600°C": "40" } },
+                        "SAE 5120": { maxHardness: "63 HRC", processInfo: { temp: "900-930°C", cooling: "Martêmpera" }, treatments: { "180°C": "63", "200°C": "59", "250°C": "57", "300°C": "54", "350°C": "51", "400°C": "47", "500°C": "42", "600°C": "38" } },
+                        "SAE 1020": { maxHardness: "65 HRC", processInfo: { temp: "900-930°C", cooling: "Água" }, treatments: { "180°C": "62", "200°C": "60", "250°C": "58", "300°C": "55", "350°C": "50", "400°C": "48", "500°C": "42", "600°C": "35" } },
+                    },
+                    "Aços Ferramenta": {
+                         "SAE D-6": { maxHardness: "64 HRC", processInfo: { temp: "950°C", cooling: "Ar / Martêmpera" }, treatments: { "180°C": "64", "200°C": "63", "250°C": "62", "300°C": "60", "350°C": "58", "400°C": "57", "450°C": "56", "500°C": "53", "550°C": "50", "600°C": "48" } },
+                         "SAE D-2": { maxHardness: "63 HRC", processInfo: { temp: "950°C", cooling: "Martêmpera" }, treatments: { "180°C": "62", "200°C": "61", "250°C": "59", "300°C": "58", "350°C": "57", "400°C": "56", "450°C": "55", "500°C": "54", "550°C": "52", "600°C": "50" } },
+                         "SAE O-1": { maxHardness: "63 HRC", processInfo: { temp: "790-820°C", cooling: "Martêmpera" }, treatments: { "180°C": "62", "200°C": "61", "250°C": "60", "300°C": "58", "350°C": "55", "400°C": "53", "450°C": "50", "500°C": "48", "550°C": "45", "600°C": "42" } },
+                         "SAE H-13": { maxHardness: "56 HRC", processInfo: { temp: "950°C", cooling: "Martêmpera" }, treatments: { "300°C": "56", "350°C": "55", "400°C": "54", "450°C": "53", "500°C": "50" } },
+                         "SAE W-1": { maxHardness: "65 HRC", processInfo: { temp: "780-820°C", cooling: "Água" }, treatments: { "180°C": "63", "200°C": "61", "250°C": "60", "300°C": "57", "350°C": "55", "400°C": "53", "450°C": "51", "500°C": "48", "550°C": "45", "600°C": "42" } },
+                         "SAE P-20": { maxHardness: "55 HRC", processInfo: { temp: "860°C", cooling: "Martêmpera" }, treatments: { "180°C": "54", "200°C": "49", "250°C": "48", "300°C": "45", "350°C": "38", "400°C": "35", "450°C": "34", "500°C": "30", "550°C": "28"} },
+                    }
+                };
+                const hardnessConversionDataCalc = [
+                    { hrc: 65.3, hb: 745, hv: 840, tensile_kgf: 260 }, { hrc: 61.7, hb: 682, hv: 737, tensile_kgf: 240 }, { hrc: 60.0, hb: 653, hv: 697, tensile_kgf: 230 },
+                    { hrc: 57.3, hb: 601, hv: 640, tensile_kgf: 212 }, { hrc: 54.7, hb: 555, hv: 591, tensile_kgf: 196 }, { hrc: 52.1, hb: 514, hv: 547, tensile_kgf: 181 },
+                    { hrc: 51.0, hb: 495, hv: 528, tensile_kgf: 175 }, { hrc: 49.6, hb: 477, hv: 508, tensile_kgf: 168 }, { hrc: 48.5, hb: 461, hv: 491, tensile_kgf: 163 },
+                    { hrc: 47.1, hb: 444, hv: 472, tensile_kgf: 157 }, { hrc: 45.7, hb: 429, hv: 455, tensile_kgf: 151 }, { hrc: 44.5, hb: 415, hv: 440, tensile_kgf: 146 },
+                    { hrc: 43.1, hb: 401, hv: 425, tensile_kgf: 142 }, { hrc: 41.8, hb: 388, hv: 410, tensile_kgf: 137 }, { hrc: 40.4, hb: 375, hv: 396, tensile_kgf: 132 },
+                    { hrc: 39.1, hb: 363, hv: 383, tensile_kgf: 128 }, { hrc: 37.9, hb: 352, hv: 372, tensile_kgf: 124 }, { hrc: 36.6, hb: 341, hv: 360, tensile_kgf: 120 },
+                    { hrc: 35.5, hb: 331, hv: 350, tensile_kgf: 117 }, { hrc: 34.3, hb: 321, hv: 339, tensile_kgf: 113 }, { hrc: 33.1, hb: 311, hv: 328, tensile_kgf: 110 },
+                    { hrc: 32.1, hb: 302, hv: 319, tensile_kgf: 107 }, { hrc: 30.9, hb: 293, hv: 309, tensile_kgf: 103 }, { hrc: 29.9, hb: 285, hv: 301, tensile_kgf: 101 },
+                    { hrc: 28.8, hb: 277, hv: 292, tensile_kgf: 98 }, { hrc: 27.6, hb: 269, hv: 284, tensile_kgf: 95 }, { hrc: 26.6, hb: 262, hv: 276, tensile_kgf: 92 },
+                    { hrc: 25.4, hb: 255, hv: 269, tensile_kgf: 90 }, { hrc: 24.2, hb: 248, hv: 261, tensile_kgf: 88 }, { hrc: 22.8, hb: 241, hv: 253, tensile_kgf: 85 },
+                    { hrc: 20.5, hb: 229, hv: 241, tensile_kgf: 81 }
+                ];
+
+                const steelSelect = document.getElementById('calc-steel-select');
+                const initialHardnessInput = document.getElementById('calc-initial-hardness');
+                const resultsSection = document.getElementById('calc-results-section');
+                const resultsGrid = document.getElementById('calc-results-grid');
+                const welcomeMessage = document.getElementById('calc-welcome-message');
+                const noResultsMessage = document.getElementById('calc-no-results-message');
+                const processInfoContainer = document.getElementById('calc-process-info-container');
+                const modal = document.getElementById('calc-conversion-modal');
+                const modalBackdrop = document.getElementById('calc-modal-backdrop');
+                const modalContent = document.getElementById('calc-modal-content');
+                const modalBody = document.getElementById('calc-modal-body');
+                const closeModalBtn = document.getElementById('calc-close-modal-btn');
+
+                Object.keys(steelDataCalc).forEach(category => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = category;
+                    const steelsInCategory = steelDataCalc[category];
+                    Object.keys(steelsInCategory).sort().forEach(steelName => {
+                        const option = document.createElement('option');
+                        option.value = `${category}|${steelName}`;
+                        option.textContent = steelName;
+                        optgroup.appendChild(option);
+                    });
+                    steelSelect.appendChild(optgroup);
+                });
+                
+                function findClosestConversion(hrc) {
+                    if (!hrc || isNaN(hrc)) return { hrc: hrc, hb: 'N/A', hv: 'N/A', tensile_kgf: 'N/A' };
+                    return hardnessConversionDataCalc.reduce((prev, curr) => (Math.abs(curr.hrc - hrc) < Math.abs(prev.hrc - hrc) ? curr : prev));
+                }
+
+                function showModal(hrc) {
+                    const conversion = findClosestConversion(parseFloat(hrc));
+                    modalBody.innerHTML = `
+                        <div class="flex justify-between border-b pb-2"><span class="font-semibold text-gray-700">Rockwell C (HRC):</span><span class="font-bold text-red-600 text-lg">${hrc}</span></div>
+                        <div class="flex justify-between border-b py-2"><span class="font-semibold text-gray-700">Brinell (HB):</span><span class="font-bold text-gray-800">${conversion.hb}</span></div>
+                        <div class="flex justify-between border-b py-2"><span class="font-semibold text-gray-700">Vickers (HV):</span><span class="font-bold text-gray-800">${conversion.hv}</span></div>
+                        <div class="flex justify-between pt-2"><span class="font-semibold text-gray-700">Resist. à Tração:</span><span class="font-bold text-gray-800">${conversion.tensile_kgf} kgf/mm²</span></div>`;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+
+                function hideModal() {
+                     modal.classList.add('hidden');
+                     modal.classList.remove('flex');
+                }
+
+                closeModalBtn.addEventListener('click', hideModal);
+                modalBackdrop.addEventListener('click', hideModal);
+
+                steelSelect.addEventListener('change', (event) => {
+                    const [category, selectedSteelName] = event.target.value.split('|');
+                    const data = steelDataCalc[category][selectedSteelName];
+                    if (!data) return;
+
+                    welcomeMessage.classList.add('hidden');
+                    resultsSection.classList.remove('hidden');
+                    processInfoContainer.classList.remove('hidden');
+                    initialHardnessInput.value = data.maxHardness;
+                    processInfoContainer.innerHTML = `
+                        <p class="font-bold normatic-blue-text">Parâmetros de Têmpera:</p>
+                        <p class="text-gray-600"><span class="font-medium">Temperatura:</span> ${data.processInfo.temp}</p>
+                        <p class="text-gray-600"><span class="font-medium">Resfriamento:</span> ${data.processInfo.cooling}</p>`;
+                    resultsGrid.innerHTML = '';
+                    const treatments = data.treatments;
+                    const treatmentKeys = Object.keys(treatments);
+                    noResultsMessage.classList.toggle('hidden', treatmentKeys.length > 0);
+                    treatmentKeys.forEach(temp => {
+                        const hardness = treatments[temp];
+                        const card = document.createElement('div');
+                        card.className = 'bg-gray-50 rounded-lg p-4 text-center border border-gray-200 hover:shadow-md hover:border-red-400 transition-all duration-200 cursor-pointer';
+                        card.innerHTML = `
+                            <p class="text-sm text-gray-500 font-medium">Revenimento</p>
+                            <p class="text-lg font-semibold normatic-red-text">${temp}</p>
+                            <p class="mt-2 text-sm text-gray-500">Dureza Final</p>
+                            <p class="text-xl font-bold text-gray-900">${hardness} HRC</p>`;
+                        card.addEventListener('click', () => showModal(hardness));
+                        resultsGrid.appendChild(card);
+                    });
+                });
+
+                page.dataset.initialized = 'true';
+            }
+
+
+            // --- INICIALIZAÇÃO GERAL ---
+            lucide.createIcons();
+            updateWhatsappVisibility();
+
+            // --- LIGAÇÃO COM ANDROID WEBVIEW ---
+            function triggerAppBack() {
+                const isPortalVisible = !document.getElementById('client-portal-wrapper').classList.contains('hidden');
+                if (isPortalVisible && navigationHistory.length > 0) {
+                    const previousFunctionButton = document.getElementById('previous-function-button');
+                    if (previousFunctionButton) {
+                        previousFunctionButton.click();
+                        return true;
+                    }
+                }
+                return false; 
+            }
+
+            // --- LÓGICA PARA LAYOUT RESPONSIVO DO CABEÇALHO ---
+            function handleResponsiveHeader() {
+                const headerTopContainer = document.querySelector('.header-top .container');
+                const mainNav = document.getElementById('main-nav');
+                const headerAuthSection = document.getElementById('header-auth-section');
+                
+                if (!headerTopContainer || !mainNav || !headerAuthSection) {
+                    console.error("Elementos do cabeçalho não encontrados para o script de responsividade.");
+                    return;
+                }
+
+                if (window.innerWidth <= 500) {
+                    if (headerAuthSection.parentElement !== mainNav) {
+                        mainNav.appendChild(headerAuthSection);
+                    }
+                } else {
+                    if (headerAuthSection.parentElement !== headerTopContainer) {
+                        headerTopContainer.appendChild(headerAuthSection);
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', handleResponsiveHeader);
+            handleResponsiveHeader();
+
+        });
+    </script>
+</body>
+</html>
